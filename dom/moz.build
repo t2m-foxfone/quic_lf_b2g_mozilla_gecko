@@ -76,6 +76,8 @@ PARALLEL_DIRS += [
     'telephony',
     'inputmethod',
     'webidl',
+    #dingp@tcl.com add jrd for mmitest
+    'jrd',
 ]
 
 if CONFIG['OS_ARCH'] == 'WINNT':

@@ -190,6 +190,12 @@
 #include "TimeManager.h"
 #endif
 
+// dingp@tcl.com add jrd for fxofone
+#if 1  // c++ jrd xuzhe
+#include "JrdNvAccess.h"
+#endif
+
+
 using namespace mozilla;
 using namespace mozilla::dom;
 
@@ -522,6 +528,14 @@ static nsDOMClassInfoData sClassInfoData[] = {
 
   NS_DEFINE_CLASSINFO_DATA(LockedFile, nsEventTargetSH,
                            EVENTTARGET_SCRIPTABLE_FLAGS)
+
+// dingp@tcl.com add for foxfone
+#if 1  // c++ jrd xuzhe
+  NS_DEFINE_CLASSINFO_DATA(JrdNvAccess, nsDOMGenericSH,
+                           DOM_DEFAULT_SCRIPTABLE_FLAGS)
+#endif
+
+
   NS_DEFINE_CLASSINFO_DATA(CSSFontFeatureValuesRule, nsDOMGenericSH,
                            DOM_DEFAULT_SCRIPTABLE_FLAGS)
 
@@ -1286,6 +1300,14 @@ nsDOMClassInfo::Init()
   DOM_CLASSINFO_MAP_BEGIN(LockedFile, nsIDOMLockedFile)
     DOM_CLASSINFO_MAP_ENTRY(nsIDOMLockedFile)
   DOM_CLASSINFO_MAP_END
+
+// dingp@tcl.com add for foxfone
+#if 1  // c++ jrd xuzhe
+  DOM_CLASSINFO_MAP_BEGIN(JrdNvAccess, nsIJrdNvAccess)
+    DOM_CLASSINFO_MAP_ENTRY(nsIJrdNvAccess)
+    DOM_CLASSINFO_MAP_ENTRY(nsIDOMEventTarget)
+  DOM_CLASSINFO_MAP_END
+#endif
 
   DOM_CLASSINFO_MAP_BEGIN(CSSFontFeatureValuesRule, nsIDOMCSSFontFeatureValuesRule)
     DOM_CLASSINFO_MAP_ENTRY(nsIDOMCSSFontFeatureValuesRule)

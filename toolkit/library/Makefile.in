@@ -234,6 +234,16 @@ ifneq (,$(filter rtsp,$(NECKO_PROTOCOLS)))
 OS_LIBS += -lstagefright_foundation
 endif
 
+## dingp@tcl.com add for mmitest
+##c++ jrd xuzhe
+ifeq (gonk,$(MOZ_WIDGET_TOOLKIT))
+OS_LIBS += \
+#	-lnv \
+#	-loncrpc \
+#        -lsuapp_d_native \
+	$(NULL)
+endif
+
 ifdef MOZ_WMF
 OS_LIBS += $(call EXPAND_LIBNAME,mfuuid wmcodecdspuuid strmiids)
 endif
