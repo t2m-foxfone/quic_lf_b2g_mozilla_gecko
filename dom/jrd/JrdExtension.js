@@ -125,7 +125,7 @@ jrdIDOMExtension.prototype = {
         break;
 
       case 'qxdm':
-        run_str = '/system/bin/diag_mdlog -f /mnt/sdcard/jrdlog/qxdm/diag.cfg';
+        run_str = '/system/bin/diag_mdlog -f /storage/sdcard1/jrdlog/qxdm/diag.cfg';
         break;
 
       case 'logcat':
@@ -133,7 +133,7 @@ jrdIDOMExtension.prototype = {
         break;
 
       case 'dmesg':
-        run_str = '/system/bin/dmesg';
+        run_str = '/system/bin/cat /proc/kmsg';
         break;
 
       default:
@@ -152,7 +152,7 @@ jrdIDOMExtension.prototype = {
       directoryPath = '/data/jrdlog/' + aProcessType + '/';
     }
     else { //SDCARD
-      directoryPath = '/mnt/sdcard/jrdlog/' + aProcessType + '/';
+      directoryPath = '/storage/sdcard1/jrdlog/' + aProcessType + '/';
     }
     debug('_getDestDicPath  directoryPath: ' + directoryPath);
     return directoryPath;
@@ -268,7 +268,7 @@ jrdIDOMExtension.prototype = {
             //Diag_log or logcat will not observe or callback anything when it is running.
             //So add the "process-running" case to handle it.
             //Gaia can perform something in the onsuccess function of the refer request.
-            if (type === 'qxdm' || type === 'logcat') {
+            if (type === 'qxdm' || type === 'logcat' || type ==='dmesg') {
               let request = this.getRequest(aMsg.requestID);
               let data = {};
               data.type = type;
@@ -484,6 +484,13 @@ jrdIDOMExtension.prototype = {
     debug('SetChargerLed');
     cpmm.sendAsyncMessage('JrdSrv:SetChargerLED', {config: config});
   },
+
+/*--- dingp@tcl.com Add for Camera LED Test ---*/
+  setCameraLed: function(config) {
+    debug('SetCameraLed');
+    cpmm.sendAsyncMessage('JrdSrv:SetCameraLED', {config: config});
+  },
+
 
 /*----jrd_tanya add for get NV data start----*/
   readNvitem: function(item) {
@@ -712,6 +719,37 @@ jrdIDOMExtension.prototype = {
         break;
     }
   },
+
+  // dingp@tcl.com add for hide factory mode dial code at 2014-02-24 11:19:51 AM
+  getSysCode: function(code) {
+
+    let a = '';
+
+    debug('sysInfoRead ============= code = ' + code);
+    if ('*#3228#' === code) {
+      a = '1001';
+    } else if ('*#2886#' === code) {
+      a = '1002';
+    } else if ('*#573564#' === code) {
+      a = '1003';
+    } else if ('*#1201195#' === code) {
+      a = '1004';
+    } else if ('*#1201194#' === code) {
+      a = '1005';
+
+    } else if ('*#06#' === code) {
+      a = '2001';
+    } else if ('*#837837#' === code) {
+      a = '2002';
+    } else if ('###232#' === code) {
+      a = '2003';
+
+    } else {
+      a = '1000'
+    }
+    return a;
+  },
+
 
 	fileRead: function(file) {
 		dump('[WCL] | [Jrd] | file: ' + file + '\n');

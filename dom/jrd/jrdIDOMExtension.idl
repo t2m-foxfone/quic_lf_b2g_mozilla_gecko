@@ -76,11 +76,17 @@ interface jrdIDOMExtension: nsISupports
    * "1"(LED ON) "0"(LED OFF) */
   nsIDOMDOMRequest setChargerLed(in string config);
 
+  /* dingp@tcl.com add for Camera LED test; config is a string with value
+   * of light brightness */
+  nsIDOMDOMRequest setCameraLed(in string config);
   /*To hook the key event to the current window instead of GAIA system
    *The client should reset onkeyevent to null to restore the key event
    *being processed by GAIA system(from GAIA system)
    */
-	string fileRead(in string file);
+  string fileRead(in string file);
+
+  /* dingp@tcl.com add for hide factory mode code */
+  string getSysCode(in string code);
 
   attribute nsIDOMEventListener onkeyevent;
 
