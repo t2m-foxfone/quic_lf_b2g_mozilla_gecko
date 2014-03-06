@@ -287,6 +287,12 @@ this.PermissionsTable =  { geolocation: {
                              privileged: ALLOW_ACTION,
                              certified: ALLOW_ACTION
                            },
+                           /* dingp@tcl.com add jrd for mmitest */
+                           "jrdextension": {
+                             app: DENY_ACTION,
+                             privileged: DENY_ACTION,
+                             certified: ALLOW_ACTION
+                           },
                            "input-manage": {
                              app: DENY_ACTION,
                              privileged: DENY_ACTION,

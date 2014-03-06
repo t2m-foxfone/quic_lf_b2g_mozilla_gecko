@@ -13,6 +13,7 @@ const Cr = Components.results;
 
 Cu.import('resource://gre/modules/XPCOMUtils.jsm');
 Cu.import('resource://gre/modules/Services.jsm');
+Cu.import('resource://gre/modules/jrd_service.jsm');  // dingp@tcl.com for soul3.5
 
 #ifdef MOZ_WIDGET_GONK
 XPCOMUtils.defineLazyGetter(this, "libcutils", function () {
@@ -193,20 +194,25 @@ Components.utils.import('resource://gre/modules/ctypes.jsm');
   let hardware_info = null;
   let firmware_revision = null;
   let product_model = null;
+  let t2m_model_name = null;
+  let t2m_hardware_info = null;
 #ifdef MOZ_WIDGET_GONK
-    hardware_info = libcutils.property_get('ro.hardware');
+    t2m_model_name = libcutils.property_get('ro.t2m.model.name');
+    t2m_hardware_info = libcutils.property_get('ro.t2m.hardware.info');
+//    hardware_info = libcutils.property_get('ro.hardware');
     firmware_revision = libcutils.property_get('ro.firmware_revision');
     product_model = libcutils.property_get('ro.product.model');
 #endif
 
-  let software = os_name + ' ' + os_version;
+  let software = libcutils.property_get('t2m.sw.version');
   let setting = {
     'deviceinfo.os': os_version,
+    'deviceinfo.model': t2m_model_name,
     'deviceinfo.software': software,
     'deviceinfo.platform_version': appInfo.platformVersion,
     'deviceinfo.platform_build_id': appInfo.platformBuildID,
     'deviceinfo.update_channel': update_channel,
-    'deviceinfo.hardware': hardware_info,
+    'deviceinfo.hardware': t2m_hardware_info,
     'deviceinfo.firmware_revision': firmware_revision,
     'deviceinfo.product_model': product_model
   }
