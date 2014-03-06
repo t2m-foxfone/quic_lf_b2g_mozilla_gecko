@@ -66,7 +66,8 @@ this.JrdService = {
       'JrdSrv:CheckIsCommandRunnig',
       'JrdSrv:ReadNvitem', //jrd_tanya for ReadNvitem
       'JrdSrv:WriteNvitem', //jrd_tanya for WriteNvitem
-      'JrdSrv:SetChargerLED' //jrd_tanya for Set Charger LED
+      'JrdSrv:SetChargerLED', //jrd_tanya for Set Charger LED
+      'JrdSrv:SetCameraLED' //jrd_tanya for Set Camera LED
       ];
     this._messages.forEach((function(msgName) {
         ppmm.addMessageListener(msgName, this);
@@ -272,6 +273,7 @@ this.JrdService = {
           //file.initWithPath('/bin/bash');
           file.initWithPath('/system/bin/sh');
           args.push('-c', program + ' ' + argument + ' >' + output);
+          debug('args' + args);
         }
         else {
           debug('program, Arguments: ' + program + ' ' + argument);
@@ -456,6 +458,25 @@ this.JrdService = {
     }
   },
 
+  // dingp@tcl.com add for CameraLED test
+  _setcameraled: function(config) {
+
+    try {
+      let file = Components.classes['@mozilla.org/file/local;1'].createInstance(Components.interfaces.nsILocalFile);
+      file.initWithPath("/sys/class/leds/flashlight/brightness");
+      var foStream = Components.classes["@mozilla.org/network/file-output-stream;1"].createInstance(Components.interfaces.nsIFileOutputStream);
+      foStream.init(file, 0x02 | 0x08 | 0x20, "0666", 0);
+      var converter = Components.classes["@mozilla.org/intl/converter-output-stream;1"].createInstance(Components.interfaces.nsIConverterOutputStream);
+      converter.init(foStream, "UTF-8", 0, 0);
+      converter.writeString(config);
+      converter.close();
+    } catch (ex) {
+      debug('setcaeraled io error! ex = ' + ex);
+    }
+  },
+
+
+
   receiveMessage: function(aMessage) {
     debug('receiveMessage: ' + aMessage.name);
     let mm = aMessage.target;
@@ -586,6 +607,7 @@ this.JrdService = {
 
       //jrd_tyin add for mmitest audio_loop start
       case 'JrdSrv:AudioLoop':
+        debug(' msg.param ======================== ' + msg.param);
         if(msg.operation === 'start') {
           let file = Components.classes['@mozilla.org/file/local;1'].createInstance(Components.interfaces.nsILocalFile);
           let process = Components.classes['@mozilla.org/process/util;1'].createInstance(Components.interfaces.nsIProcess);
@@ -596,10 +618,24 @@ this.JrdService = {
           //Request: volume too loud. change the volume for both mic(4 -> 2 and headset-mic 4->1)
           // dingp@tcl.com Modified test command for audio test at 2014-01-03
           if(msg.param === 'mic') {
-            args = ['-tc', '19', '-c', '/etc/ftm_test_config', '-d', '20', '-v', '88'];
+            args = ['-tc', '19', '-c', '/etc/ftm_test_config', '-d', '8', '-v', '88'];
+          }
+          else if(msg.param === 'sub-mic') {
+            //args = ['-tc', '19', '-c', '/etc/ftm_test_config', '-d', '20', '-v', '88'];
+            break;
+          }
+          else if(msg.param === 'headset-left') {
+            args = ['-tc', '7', '-c', '/etc/ftm_test_config', '-d', '6', '-v', '45'];
+          }
+          else if(msg.param === 'headset-right') {
+            args = ['-tc', '6', '-c', '/etc/ftm_test_config', '-d', '6', '-v', '45'];
+          }
+          else if(msg.param === 'headset-mic') {
+            args = ['-tc', '22', '-c', '/etc/ftm_test_config', '-d', '8', '-v', '88'];
           }
           else {
-            args = ['-tc', '22', '-c', '/etc/ftm_test_config', '-d', '60', '-v', '88'];
+            //args = ['-tc', '22', '-c', '/etc/ftm_test_config', '-d', '60', '-v', '88'];
+            break;
           }
 
           try {
@@ -785,6 +821,11 @@ this.JrdService = {
       // dingp@tcl.com add for Charger LED test
       case 'JrdSrv:SetChargerLED':
         this._setchargerled(msg.config);
+        break;
+
+      // dingp@tcl.com add for Camera LED test
+      case 'JrdSrv:SetCameraLED':
+        this._setcameraled(msg.config);
         break;
 
       default:
