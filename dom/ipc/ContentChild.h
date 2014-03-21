@@ -212,7 +212,10 @@ public:
 
     virtual bool RecvGarbageCollect();
     virtual bool RecvCycleCollect();
-
+    /*Bug#:597107 Added by baijian 2014-02-09 Alloc and dealloc fotaChild begin*/
+    virtual PJrdFotaChild* AllocPJrdFotaChild();
+    virtual bool DeallocPJrdFotaChild(PJrdFotaChild*);
+    /*Bug#:597107 Added by baijian 2014-02-09 Alloc and dealloc fotaChild end*/
     virtual bool RecvAppInfo(const nsCString& version, const nsCString& buildID,
                              const nsCString& name, const nsCString& UAName);
 

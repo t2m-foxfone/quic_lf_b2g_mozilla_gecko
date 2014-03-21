@@ -1,0 +1,136 @@
+# -*- Mode: python; c-basic-offset: 4; indent-tabs-mode: nil; tab-width: 40 -*-
+# vim: set filetype=python:
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+XPIDL_SOURCES += [
+    'nsIDOMJrdFota.idl',
+    'nsINavigatorJrdFota.idl',
+]
+
+XPIDL_MODULE = 'dom_jrdfota'
+
+#MODULE = 'dom'
+
+EXPORTS.mozilla.dom.jrdfota += [
+    'JrdFotaNative.h',
+    'JrdFotaParent.h',
+    'MozJrdFotaManager.h',
+    'Types.h',
+]
+
+EXPORTS.inc +=[
+    'inc/gisusdll.h',
+    'inc/mydll.h',
+    'inc/mytypes.h',
+    'inc/otu_clienttype.h',
+    'inc/otu_dll_encrypt.h',
+    'inc/otu_op.h',
+    'inc/otu_options.h',
+    'inc/otu_status.h',
+    'inc/otu_struct.h',
+    'inc/otu_timeout.h',
+    'inc/otu_upgrade_mode.h',
+    'inc/scrambled_gisus_symbols.h',
+    'inc/unused.h',
+]
+
+EXPORTS.openssl += [
+    "openssl/aes.h",
+    'openssl/asn1.h',
+    'openssl/asn1_mac.h',
+    'openssl/asn1t.h',
+    'openssl/bio.h',
+    'openssl/blowfish.h',
+    'openssl/bn.h',
+    'openssl/buffer.h',
+    'openssl/camellia.h',
+    'openssl/cast.h',
+    'openssl/cms.h',
+    'openssl/comp.h',
+    'openssl/conf.h',
+    'openssl/conf_api.h',
+    'openssl/crypto.h',
+    'openssl/des.h',
+    'openssl/des_old.h',
+    'openssl/dh.h',
+    'openssl/dsa.h',
+    'openssl/dso.h',
+    'openssl/dtls1.h',
+    'openssl/e_os2.h',
+    'openssl/ebcdic.h',
+    'openssl/ec.h',
+    'openssl/ecdh.h',
+    'openssl/ecdsa.h',
+    'openssl/engine.h',
+    'openssl/err.h',
+    'openssl/evp.h',
+    'openssl/hmac.h',
+    'openssl/idea.h',
+    'openssl/krb5_asn.h',
+    'openssl/kssl.h',
+    'openssl/lhash.h',
+    'openssl/md4.h',
+    'openssl/md5.h',
+    'openssl/mdc2.h',
+    'openssl/modes.h',
+    'openssl/obj_mac.h',
+    'openssl/objects.h',
+    'openssl/ocsp.h',
+    'openssl/opensslconf.h',
+    'openssl/opensslv.h',
+    'openssl/ossl_typ.h',
+    'openssl/pem.h',
+    'openssl/pem2.h',
+    'openssl/pkcs12.h',
+    'openssl/pkcs7.h',
+    'openssl/pqueue.h',
+    'openssl/rand.h',
+    'openssl/rc2.h',
+    'openssl/rc4.h',
+    'openssl/ripemd.h',
+    'openssl/rsa.h',
+    'openssl/safestack.h',
+    'openssl/seed.h',
+    'openssl/sha.h',
+    'openssl/ssl.h',
+    'openssl/ssl2.h',
+    'openssl/ssl23.h',
+    'openssl/ssl3.h',
+    'openssl/stack.h',
+    'openssl/symhacks.h',
+    'openssl/tls1.h',
+    'openssl/ts.h',
+    'openssl/txt_db.h',
+    'openssl/ui.h',
+    'openssl/ui_compat.h',
+    'openssl/whrlpool.h',
+    'openssl/x509.h',
+    'openssl/x509_vfy.h',
+    'openssl/x509v3.h',
+]
+
+SOURCES += [
+    'JrdFotaNative.cpp',
+    'JrdFotaParent.cpp',
+    'MozJrdFotaManager.cpp',
+]
+
+IPDL_SOURCES += [
+    'ipc/PJrdFota.ipdl',
+]
+
+FAIL_ON_WARNINGS = True
+#FORCE_STATIC_LIB = True
+#LIBXUL_LIBRARY = True
+#LIBRARY_NAME = 'dom_jrdfota_s'
+include('/ipc/chromium/chromium-config.mozbuild')
+LOCAL_INCLUDES += [
+    '/content/events/src',
+    '/dom/base',
+    '/dom/jrdfota',
+    '/ipc',
+]
+
+FINAL_LIBRARY ='gklayout'

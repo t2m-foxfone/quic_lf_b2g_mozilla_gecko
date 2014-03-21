@@ -100,6 +100,12 @@ namespace system {
 class AudioChannelManager;
 #endif
 } // namespace system
+/*Bug#:597107 Added by baijian 2014-02-09 import MozJrdFotaManager begin*/
+namespace jrdfota {
+class MozJrdFotaManager;
+}
+/*Bug#:597107 Added by baijian 2014-02-09 import MozJrdFotaManager end*/
+
 
 class Navigator : public nsIDOMNavigator
                 , public nsIMozNavigatorNetwork
@@ -141,7 +147,9 @@ public:
 
   // Helper to initialize mMessagesManager.
   nsresult EnsureMessagesManager();
-
+/*Bug#:597107 Added by baijian 2014-02-09 WebIDL API begin*/
+  jrdfota::MozJrdFotaManager* GetMozJrdFota(ErrorResult& aRv);
+/*Bug#:597107 Added by baijian 2014-02-09 WebIDL API end*/
   // The XPCOM GetProduct is OK
   // The XPCOM GetLanguage is OK
   bool OnLine();
@@ -331,6 +339,9 @@ private:
   nsCOMPtr<nsIDOMNavigatorSystemMessages> mMessagesManager;
   nsTArray<nsRefPtr<nsDOMDeviceStorage> > mDeviceStorageStores;
   nsRefPtr<time::TimeManager> mTimeManager;
+  /*Bug#:597107 Added by baijian 2014-02-09 WebIDL API begin*/
+  nsRefPtr<jrdfota::MozJrdFotaManager> mJrdFotaManager;
+  /*Bug#:597107 Added by baijian 2014-02-09 WebIDL API begin*/
   nsCOMPtr<nsPIDOMWindow> mWindow;
 };
 

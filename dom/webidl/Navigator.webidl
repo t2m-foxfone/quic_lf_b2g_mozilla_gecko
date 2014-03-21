@@ -340,3 +340,9 @@ partial interface Navigator {
                               NavigatorUserMediaErrorCallback onerror);
 };
 #endif // MOZ_MEDIA_NAVIGATOR
+#Bug:597107 Added by baijian 2014-02-09 define mozJrdFota as Navigator member begin
+partial interface Navigator {
+  [Throws]
+  readonly attribute MozJrdFotaManager mozJrdFota;
+};
+#Bug:597107 Added by baijian 2014-02-09 define mozJrdFota as Navigator member end

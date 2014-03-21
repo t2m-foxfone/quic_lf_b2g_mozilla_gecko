@@ -78,6 +78,8 @@ PARALLEL_DIRS += [
     'webidl',
     #dingp@tcl.com add jrd for mmitest
     'jrd',
+    #Bug:597107 Added by baijian 2014-02-09 fota funcation
+    'jrdfota',
 ]
 
 if CONFIG['OS_ARCH'] == 'WINNT':

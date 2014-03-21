@@ -106,7 +106,9 @@
 #include "mozilla/dom/bluetooth/PBluetoothChild.h"
 #include "mozilla/dom/PFMRadioChild.h"
 #include "mozilla/ipc/InputStreamUtils.h"
-
+/*Bug#:597107 Added by baijian 2014-02-09 Alloc and dealloc fotaChild begin*/
+#include "mozilla/dom/jrdfota/MozJrdFotaManager.h"
+/*Bug#:597107 Added by baijian 2014-02-09 Alloc and dealloc fotaChild end*/
 #ifdef MOZ_WEBSPEECH
 #include "mozilla/dom/PSpeechSynthesisChild.h"
 #endif
@@ -155,7 +157,9 @@ static bool sNuwaForking = false;
 // A sentinel value for checking whether RESERVED_INT_STACK is large enough.
 #define STACK_SENTINEL_VALUE 0xdeadbeef
 #endif
-
+/*Bug#:597107 Added by baijian 2014-02-09 Alloc and dealloc fotaChild begin*/
+using namespace mozilla::dom::jrdfota;
+/*Bug#:597107 Added by baijian 2014-02-09 Alloc and dealloc fotaChild end*/
 namespace mozilla {
 namespace dom {
 
@@ -988,6 +992,21 @@ ContentChild::DeallocPSmsChild(PSmsChild* aSms)
     delete aSms;
     return true;
 }
+
+/*Bug#:597107 Added by baijian 2014-02-09 Alloc and dealloc fotaChild begin*/
+PJrdFotaChild*
+ContentChild::AllocPJrdFotaChild()
+{
+    return new JrdFotaChild();
+}
+
+bool
+ContentChild::DeallocPJrdFotaChild(PJrdFotaChild* aJrdFota)
+{
+    delete aJrdFota;
+    return true;
+}
+/*Bug#:597107 Added by baijian 2014-02-09 Alloc and dealloc fotaChild end*/
 
 PTelephonyChild*
 ContentChild::AllocPTelephonyChild()
