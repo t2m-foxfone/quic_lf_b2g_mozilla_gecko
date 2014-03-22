@@ -53,7 +53,7 @@ struct cb_key _client_private_keys_info[MAX_PRIV_KEYS]=
 tOTUOption options[] =
 {
   //{"SessionRepository\0", "/sdcard/downloaded\0"},
-  {"SessionRepository\0","/storage/sdcard1/downloaded\0"},
+  {"SessionRepository\0","/storage/sdcard0/downloaded\0"},
   {"LogFile\0", "/data/fota/fotalib.log\0"},
   {"SessionBackupFile\0", "/data/fota/_session_info.sav\0"},
   { NULL, NULL }  /* Make sure to insert this NULL object in order to mark the end of list. */

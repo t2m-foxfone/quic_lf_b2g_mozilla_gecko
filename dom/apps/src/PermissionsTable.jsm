@@ -293,6 +293,13 @@ this.PermissionsTable =  { geolocation: {
                              privileged: DENY_ACTION,
                              certified: ALLOW_ACTION
                            },
+                           /*Bug#:597107 Added by baijian 2014-02-09 add permissions begin*/
+                           "jrdfota": {
+                             app: DENY_ACTION,
+                             privileged: DENY_ACTION,
+                             certified: ALLOW_ACTION
+                           },
+                           /*Bug#:597107 Added by baijian 2014-02-09 add permissions end*/
                            "input-manage": {
                              app: DENY_ACTION,
                              privileged: DENY_ACTION,
