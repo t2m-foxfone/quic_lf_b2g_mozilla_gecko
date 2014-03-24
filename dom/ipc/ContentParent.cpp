@@ -126,7 +126,9 @@ using namespace mozilla::system;
 #endif
 
 #include "JavaScriptParent.h"
-
+/*Bug#:597107 Added by baijian 2014-02-09 Alloc and dealloc fotaParent begin*/
+#include "mozilla/dom/jrdfota/JrdFotaParent.h"
+/*Bug#:597107 Added by baijian 2014-02-09 Alloc and dealloc fotaParent end*/
 #ifdef MOZ_B2G_FM
 #include "mozilla/dom/FMRadioParent.h"
 #endif
@@ -153,7 +155,9 @@ using namespace mozilla::ipc;
 using namespace mozilla::layers;
 using namespace mozilla::net;
 using namespace mozilla::jsipc;
-
+/*Bug#:597107 Added by baijian 2014-02-09 Alloc and dealloc fotaParent begin*/
+using namespace mozilla::dom::jrdfota;
+/*Bug#:597107 Added by baijian 2014-02-09 Alloc and dealloc fotaParent end*/
 namespace mozilla {
 namespace dom {
 
@@ -2546,7 +2550,22 @@ ContentParent::DeallocPAsmJSCacheEntryParent(PAsmJSCacheEntryParent* aActor)
   asmjscache::DeallocEntryParent(aActor);
   return true;
 }
+/*Bug#:597107 Added by baijian 2014-02-09 Alloc and dealloc fotaParent begin*/
+PJrdFotaParent*
+ContentParent::AllocPJrdFotaParent()
+{
+    JrdFotaParent* parent = new JrdFotaParent();
+    parent->AddRef();
+    return parent;
+}
 
+bool
+ContentParent::DeallocPJrdFotaParent(PJrdFotaParent* aJrdFota)
+{
+    static_cast<JrdFotaParent*>(aJrdFota)->Release();
+    return true;
+}
+/*Bug#:597107 Added by baijian 2014-02-09 Alloc and dealloc fotaParent end*/
 PSpeechSynthesisParent*
 ContentParent::AllocPSpeechSynthesisParent()
 {

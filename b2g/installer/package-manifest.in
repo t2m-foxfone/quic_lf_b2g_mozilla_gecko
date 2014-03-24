@@ -157,6 +157,8 @@
 @BINPATH@/components/dom_audiochannel.xpt
 @BINPATH@/components/dom_base.xpt
 @BINPATH@/components/dom_system.xpt
+; dingp@tcl.com add jrd for mmitest
+@BINPATH@/components/dom_jrd.xpt
 #ifdef MOZ_WIDGET_GONK
 @BINPATH@/components/dom_wifi.xpt
 @BINPATH@/components/dom_system_gonk.xpt
@@ -348,6 +350,9 @@
 @BINPATH@/components/BrowserElementParent.js
 @BINPATH@/components/ContactManager.js
 @BINPATH@/components/ContactManager.manifest
+; dingp@tcl.com add jrd for mmitest
+@BINPATH@/components/JrdExtension.js
+@BINPATH@/components/jrdExtension.manifest
 @BINPATH@/components/PhoneNumberService.js
 @BINPATH@/components/PhoneNumberService.manifest
 @BINPATH@/components/NotificationStorage.js

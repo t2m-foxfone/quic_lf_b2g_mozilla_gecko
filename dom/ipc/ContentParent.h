@@ -207,7 +207,10 @@ public:
     virtual bool RecvPStorageConstructor(PStorageParent* aActor) MOZ_OVERRIDE {
         return PContentParent::RecvPStorageConstructor(aActor);
     }
-
+    /*Bug#:597107 Added by baijian 2014-02-09 Alloc and dealloc fotaParent begin*/
+    virtual PJrdFotaParent* AllocPJrdFotaParent();
+    virtual bool DeallocPJrdFotaParent(PJrdFotaParent*);
+    /*Bug#:597107 Added by baijian 2014-02-09 Alloc and dealloc fotaParent end*/
     virtual PJavaScriptParent*
     AllocPJavaScriptParent() MOZ_OVERRIDE;
     virtual bool

@@ -1,0 +1,9 @@
+#include "nsISupports.idl"
+
+[scriptable, uuid(014d21f7-7ad9-4628-9985-b6e5916a0eb7)]
+interface nsIJrdNvAccess : nsISupports
+{
+  void readNvitem (in long item, [optional] out unsigned long count, [retval, array, size_is (count)]  out octet value);
+  void writeNvitem(in long item, in unsigned long count, [array, size_is (count)]  in octet value);
+};
+

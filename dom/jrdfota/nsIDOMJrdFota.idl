@@ -1,0 +1,87 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+#include "domstubs.idl"
+
+[scriptable, function, uuid(e76e4e3c-45a4-4d6e-99e5-8e5fffb1d970)]
+interface nsIDOMJrdFotaGetNewPackageCb : nsISupports
+{
+  /**
+   * PARAMETERS:
+   *    versionName (IN):  the update package name, example: 294ZZ
+   *    size (IN):  Total update file size in bytes
+   *    description(IN):  new package description
+  */
+  void handleEvent(in DOMString versionName,
+                   in unsigned long size,
+                   in DOMString description);
+};
+
+[scriptable, function, uuid(23828914-98d4-42d6-8f57-4e731fdbe8aa)]
+interface nsIDOMJrdFotaDownloadProgressCb : nsISupports
+{
+  /**
+   * PARAMETERS:
+   *    progressRate (IN):  A value between 0 and 100 is returned.
+  */
+  void handleEvent(in unsigned long progressRate);
+};
+
+[scriptable, function, uuid(9cba3cdc-3a2a-44ed-a72a-4bd70b98e7d3)]
+interface nsIDOMJrdFotaCommonCb : nsISupports
+{
+  /**
+   * PARAMETERS:
+   *    actionType(IN):  GetNewPackage, Download, Pause, Delete, CheckInstallResult
+   *    isSuccessed(IN):  common action success or fail
+   *    errorType(IN):  error_type
+  */
+  void handleEvent(in DOMString actionType,
+                   in bool isSuccessed,
+                   in DOMString errorType);
+};
+
+[scriptable, builtinclass, uuid(50f140da-78e8-449c-a688-d512e1df443a)]
+interface nsIDOMMozJrdFotaManager:nsISupports
+{
+  /**
+   * Get the package info of the latest updated package.
+  */
+  void getNewPackage(in nsIDOMJrdFotaGetNewPackageCb getCallback,
+                                               in nsIDOMJrdFotaCommonCb statusCallback);
+
+  /**
+   * Download the update package or resume the last download
+   * PARAMETERS:
+   *    statusCallback (IN):  100% of request has been completed, we will check the fireware(eg, check file size).
+   *          Set the download status with  success  or not according to the checking result.
+  */
+  void download(in nsIDOMJrdFotaDownloadProgressCb  downloadProgressCallback,
+                                               in nsIDOMJrdFotaCommonCb statusCallback);
+  /**
+   * Stop downloading process
+  */
+  void pause(in nsIDOMJrdFotaCommonCb pauseCallback);
+
+  /**
+   * After downloaded the update package, we will save the update file to hard disk
+   * App can call this interface to deleting the update file
+  */
+  void delete(in nsIDOMJrdFotaCommonCb deleteCallback);
+
+  /**
+   * Upgrade handset
+   * The phone will restart for installation when call this interface.
+   * So app should note the user to save their data.
+  */
+  void install(in nsIDOMJrdFotaCommonCb installCallback);
+
+  /**
+   * After installed, system will write the install result into a file.
+   * This interface can read the result and notify the app.
+  */
+  void checkInstallResult(in nsIDOMJrdFotaCommonCb checkIRCallback);
+
+  /*Action Type: "NoAction", "GetNewPackage", "Download", "CheckFirmwarm", "Pause", "Delete", "Install", "CheckInstallResult"*/
+  readonly attribute DOMString JrdFotaActionStatus;
+};

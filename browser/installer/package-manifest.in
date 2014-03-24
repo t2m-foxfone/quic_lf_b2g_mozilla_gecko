@@ -192,6 +192,8 @@
 @BINPATH@/components/dom_apps.xpt
 @BINPATH@/components/dom_base.xpt
 @BINPATH@/components/dom_system.xpt
+; dingp@tcl.com add jrd for mmitest
+@BINPATH@/components/dom_jrd.xpt
 #ifdef MOZ_B2G_BT
 @BINPATH@/components/dom_bluetooth.xpt
 #endif
@@ -522,6 +524,9 @@
 @BINPATH@/components/PermissionSettings.manifest
 @BINPATH@/components/ContactManager.js
 @BINPATH@/components/ContactManager.manifest
+; dingp@tcl.com add jrd for mmitest
+@BINPATH@/components/JrdExtension.js
+@BINPATH@/components/jrdExtension.manifest
 @BINPATH@/components/PhoneNumberService.js
 @BINPATH@/components/PhoneNumberService.manifest
 @BINPATH@/components/NotificationStorage.js

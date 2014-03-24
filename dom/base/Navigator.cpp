@@ -72,11 +72,16 @@
 #include "nsIDOMGlobalPropertyInitializer.h"
 #include "nsIDataStoreService.h"
 #include "nsJSUtils.h"
-
+/*Bug#:597107 Added by baijian 2014-02-09 Navigator invoke MozJrdFotaManager begin*/
+#include "mozilla/dom/jrdfota/MozJrdFotaManager.h"
+/*Bug#:597107 Added by baijian 2014-02-09 Navigator invoke MozJrdFotaManager end*/
 #include "nsScriptNameSpaceManager.h"
 
 #include "mozilla/dom/NavigatorBinding.h"
 #include "mozilla/dom/Promise.h"
+
+#include <android/log.h>                                                                   
+#define ERROR(args...)  __android_log_print(ANDROID_LOG_ERROR,  "Dimi", ## args)        
 
 namespace mozilla {
 namespace dom {
@@ -157,7 +162,9 @@ NS_IMPL_CYCLE_COLLECTION_TRAVERSE_BEGIN(Navigator)
   NS_IMPL_CYCLE_COLLECTION_TRAVERSE(mMessagesManager)
   NS_IMPL_CYCLE_COLLECTION_TRAVERSE(mDeviceStorageStores)
   NS_IMPL_CYCLE_COLLECTION_TRAVERSE(mTimeManager)
-
+/*Bug#:597107 Added by baijian 2014-02-09 define var:mJrdFotaManager begin*/
+  NS_IMPL_CYCLE_COLLECTION_TRAVERSE(mJrdFotaManager)
+/*Bug#:597107 Added by baijian 2014-02-09 define var:mJrdFotaManager end*/
   NS_IMPL_CYCLE_COLLECTION_TRAVERSE(mWindow)
   NS_IMPL_CYCLE_COLLECTION_TRAVERSE_SCRIPT_OBJECTS
 NS_IMPL_CYCLE_COLLECTION_TRAVERSE_END
@@ -265,6 +272,11 @@ Navigator::Invalidate()
   if (mTimeManager) {
     mTimeManager = nullptr;
   }
+/*Bug#:597107 Added by baijian 2014-02-09 Invalidate mJrdFotaManager begin*/
+  if (mJrdFotaManager) {
+    mJrdFotaManager = nullptr;
+  }
+/*Bug#:597107 Added by baijian 2014-02-09 Invalidate mJrdFotaManager end*/
 }
 
 //*****************************************************************************
@@ -1390,6 +1402,31 @@ Navigator::GetMozTime(ErrorResult& aRv)
 }
 #endif
 
+/*Bug#:597107 Added by baijian 2014-02-09 Get MozJrdFotaManager begin*/
+//*****************************************************************************
+//  Navigator::MozJrdFotaManager
+//*****************************************************************************
+jrdfota::MozJrdFotaManager*
+Navigator::GetMozJrdFota(ErrorResult& aRv)
+{
+  LOG("GetMozJrdFota ");
+  //JRD_KLWANG add for CR:461160----Protect JrdFota WebAPI
+  if (!CheckPermission("jrdfota")) {
+    LOG("GetMozJrdFota CheckPermission return false");
+    aRv.Throw(NS_ERROR_UNEXPECTED);
+    return nullptr;
+  }
+
+  if (!mJrdFotaManager) {
+    mJrdFotaManager = new jrdfota::MozJrdFotaManager(mWindow);
+  }
+  else{
+     LOG("mJrdFotaManager exist just return");
+  }
+  return mJrdFotaManager;
+}
+/*Bug#:597107 Added by baijian 2014-02-09 Get MozJrdFotaManager end*/
+
 nsDOMCameraManager*
 Navigator::GetMozCameras(ErrorResult& aRv)
 {
@@ -1802,14 +1839,19 @@ bool
 Navigator::HasNfcSupport(JSContext* /* unused */, JSObject* aGlobal)
 {
   // Do not support NFC if NFC content helper does not exist.
+  ERROR("Navigator::HasNfcSupport 1");
   nsCOMPtr<nsISupports> contentHelper = do_GetService("@mozilla.org/nfc/content-helper;1");
   if (!contentHelper) {
+    ERROR("Navigator::HasNfcSupport 2");
     return false;
   }
 
+  ERROR("Navigator::HasNfcSupport 3");
   nsCOMPtr<nsPIDOMWindow> win = GetWindowFromGlobal(aGlobal);
-  return win && (CheckPermission(win, "nfc-read") ||
-                 CheckPermission(win, "nfc-write"));
+  bool test = win && (CheckPermission(win, "nfc-read") ||
+              CheckPermission(win, "nfc-write"));
+  ERROR("Navigator::HasNfcSupport 4(%d)", test);
+  return test;
 }
 #endif // MOZ_NFC
 

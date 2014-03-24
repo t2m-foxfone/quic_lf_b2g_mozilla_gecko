@@ -58,6 +58,8 @@ LOCAL_INCLUDES += [
     '/dom/base',
     '/dom/camera',
     '/dom/file',
+    # dingp@tcl.com add jrd for mmitest
+	'/dom/jrd',
     '/dom/media',
     '/dom/speakermanager',
     '/dom/src/geolocation',
