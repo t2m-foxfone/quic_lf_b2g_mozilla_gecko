@@ -588,7 +588,6 @@ Nfc.prototype = {
     switch(aName) {
       case NFC.SETTING_NFC_ENABLED:
         debug("'nfc.enabled' is now " + aResult);
-        dump("[Dimi]'nfc.enabled' is now " + aResult);
         this._enabled = aResult;
         // General power setting
         let powerLevel = this._enabled ? NFC.NFC_POWER_LEVEL_ENABLED :
@@ -608,7 +607,6 @@ Nfc.prototype = {
    */
 
   observe: function observe(subject, topic, data) {
-    dump("[Dimi]Nfc.js observe : " + topic);
     switch (topic) {
       case NFC.TOPIC_XPCOM_SHUTDOWN:
         for each (let msgname in NFC_IPC_MSG_NAMES) {
@@ -618,11 +616,9 @@ Nfc.prototype = {
         Services.obs.removeObserver(this, NFC.TOPIC_XPCOM_SHUTDOWN);
         break;
       case NFC.TOPIC_MOZSETTINGS_CHANGED:
-        dump("[Dimi]Nfc.js observe : setting changed! " + JSON.stringify(data));
         let setting = JSON.parse(data);
         if (setting) {
           let setting = JSON.parse(data);
-          dump("[Dimi]Nfc.js observe : handle " + setting.key);
           this.handle(setting.key, setting.value);
         }
         break;

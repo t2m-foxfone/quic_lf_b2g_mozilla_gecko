@@ -80,8 +80,6 @@
 #include "mozilla/dom/NavigatorBinding.h"
 #include "mozilla/dom/Promise.h"
 
-#include <android/log.h>                                                                   
-#define ERROR(args...)  __android_log_print(ANDROID_LOG_ERROR,  "Dimi", ## args)        
 
 namespace mozilla {
 namespace dom {
@@ -1839,18 +1837,14 @@ bool
 Navigator::HasNfcSupport(JSContext* /* unused */, JSObject* aGlobal)
 {
   // Do not support NFC if NFC content helper does not exist.
-  ERROR("Navigator::HasNfcSupport 1");
   nsCOMPtr<nsISupports> contentHelper = do_GetService("@mozilla.org/nfc/content-helper;1");
   if (!contentHelper) {
-    ERROR("Navigator::HasNfcSupport 2");
     return false;
   }
 
-  ERROR("Navigator::HasNfcSupport 3");
   nsCOMPtr<nsPIDOMWindow> win = GetWindowFromGlobal(aGlobal);
   bool test = win && (CheckPermission(win, "nfc-read") ||
               CheckPermission(win, "nfc-write"));
-  ERROR("Navigator::HasNfcSupport 4(%d)", test);
   return test;
 }
 #endif // MOZ_NFC
