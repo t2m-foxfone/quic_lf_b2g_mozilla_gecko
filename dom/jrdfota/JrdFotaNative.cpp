@@ -12,10 +12,13 @@
 
 
 #include "nsStringGlue.h"
-/*Modified by tcl_baijian 2014-03-17 the storage devices path begin*/
-static char* local_session_repository_path_p = "/storage/sdcard0/downloaded";
-static char* local_update_file_path_p = "/storage/sdcard0/.downloaded/update.zip";
-/*Modified by tcl_baijian 2014-03-17 the storage devices path end*/
+#include <stdlib.h>
+
+/*Modified by tcl_baijian 2014-03-27 the storage devices path begin*/
+#define MAX_PATH 128
+static char local_session_repository_path[MAX_PATH];
+static char local_update_file_path[MAX_PATH];
+/*Modified by tcl_baijian 2014-03-27 the storage devices path end*/
 #define LOCAL_UPDAT_RESULT_FILE "/data/fota/result.txt"
 #define DEVICE_PARAM_STR_MAX_LENGTH 20
 
@@ -53,7 +56,7 @@ struct cb_key _client_private_keys_info[MAX_PRIV_KEYS]=
 tOTUOption options[] =
 {
   //{"SessionRepository\0", "/sdcard/downloaded\0"},
-  {"SessionRepository\0","/storage/sdcard0/downloaded\0"},
+  {"SessionRepository\0","/storage/sdcard0/downloaded\0"},/*default:sdcard path could not decide*/
   {"LogFile\0", "/data/fota/fotalib.log\0"},
   {"SessionBackupFile\0", "/data/fota/_session_info.sav\0"},
   { NULL, NULL }  /* Make sure to insert this NULL object in order to mark the end of list. */
@@ -65,7 +68,9 @@ namespace jrdfota {
 
 tOTUSessionInfo * JrdFotaNative::pSessionInfo = NULL;
 bool JrdFotaNative:: bGetNewPackaged = false;
-
+/*Added by tcl_baijian 2014-03-27 set the session and update file path begin*/
+static void load_ext_storage_path(void);
+/*Added by tcl_baijian 2014-03-27 set the session and update file path end*/
 /** **********************************************************
   *                  Class create and release function       *
  *************************************************************/
@@ -91,8 +96,33 @@ JrdFotaNative::JrdFotaNative() {
   /*Modified by tcl_baijian 2014-03-04 init begin*/
   bInitial = false;
   /*Modified by tcl_baijian 2014-03-04 init end*/
-}
+  /*set session and update file path*/
+  load_ext_storage_path();
 
+}
+/*Added by tcl_baijian 2014-03-27 set the session and update file path begin*/
+static void load_ext_storage_path(void)
+{
+    /*already set*/
+    if(strlen(local_session_repository_path) != 0)
+       return;
+
+    char* extStorage = getenv("EXTERNAL_STORAGE");
+    if(extStorage != NULL)
+    {
+        strcpy(local_session_repository_path,extStorage);
+        strcpy(local_update_file_path,extStorage);
+
+        strcat(local_session_repository_path,"/downloaded");
+        strcat(local_update_file_path,"/.downloaded/update.zip");
+    }
+    else
+    {
+        strcpy(local_session_repository_path,"/storage/sdcard0/downloaded");
+        strcpy(local_update_file_path,"/storage/sdcard0/.downloaded/update.zip");
+    }
+}
+/*Added by tcl_baijian 2014-03-27 set the session and update file path end*/
 JrdFotaNative::~JrdFotaNative() {
   LOG("enter\n");
 
@@ -205,10 +235,10 @@ JrdFotaNative::Delete_Int() {
 
 void
 JrdFotaNative::Install_Int() {
-  /*Modified by tcl_baijian 2014-03-17 the storage devices path begin*/
-  LOG("Updata file path: %s\n", local_update_file_path_p);
-  bool updateFileExist = _fileHandle(local_update_file_path_p, eCheckExist);
-  /*Modified by tcl_baijian 2014-03-17 the storage devices path end*/
+  /*Modified by tcl_baijian 2014-03-27 the storage devices path begin*/
+  LOG("Updata file path: %s\n", local_update_file_path);
+  bool updateFileExist = _fileHandle(local_update_file_path, eCheckExist);
+  /*Modified by tcl_baijian 2014-03-27 the storage devices path end*/
   if(true == updateFileExist) {
      LOG("Install start\n");
 
@@ -216,9 +246,9 @@ JrdFotaNative::Install_Int() {
      _fileHandle(LOCAL_UPDAT_RESULT_FILE, eCreate);
 
      nsCOMPtr<nsIRecoveryService> recoveryService = do_CreateInstance("@mozilla.org/recovery-service;1");
-     /*Modified by tcl_baijian 2014-03-17 the update package path begin*/
-     recoveryService->InstallFotaUpdate(local_update_file_path_p);
-     /*Modified by tcl_baijian 2014-03-17 the update package path end*/
+     /*Modified by tcl_baijian 2014-03-27 the update package path begin*/
+     recoveryService->InstallFotaUpdate(local_update_file_path);
+     /*Modified by tcl_baijian 2014-03-27 the update package path end*/
   }
   else {
      LOG("[ERROR] Update file not exist\n");
@@ -297,6 +327,7 @@ JrdFotaNative::CheckInstallResult_Int() {
 void
 JrdFotaNative::SelectSdcard_Int(unsigned long type,bool immediately)
 {
+#if 0
    LOG("the type=%d,immediately=%d",type,immediately);
    if(type == 0)/*internal sdcard*/
    {
@@ -314,6 +345,7 @@ JrdFotaNative::SelectSdcard_Int(unsigned long type,bool immediately)
       _fota_shut_down();
       _fota_Init();
    }
+#endif
 }
 /*Modified by tcl_baijian 2014-03-17 selected the storage path end*/
 /** **********************************************************
@@ -585,6 +617,8 @@ JrdFotaNative::_fota_Init(void) {
    * The three parameter of otu_init_lib: [log_mode]: Activate or deactivate logging into the log file.
    * The four parameter of otu_init_lib: [debug_mode]: Activate or deactivate the debug verbosity in log file.
   */
+  /*now the session path is decided*/
+  options[0].option_value = local_session_repository_path;
   /*Modified by tcl_baijian 2014-03-04 the new lib otu_init changed begin*/
   if (FOTA_DEBUG) {
     res = otu_init(callback_arr, OTU_DLL_KEY_CBF_ARRAY_MAX_SIZE, 1, 1, eCT_TCT_Android_3G_Mobile_Build_In_Fota, options);
@@ -1134,9 +1168,9 @@ JrdFotaNative::_fota_store_downloaded_file(tOTUSessionInfo* pSessionInfo) {
     * Save all files to SDCard.
     */
     path.SetLength(0);
-    /*Modified by tcl_baijian 2014-03-17 update package path begin*/
-    path.AssignASCII(local_update_file_path_p);
-    /*Modified by tcl_baijian 2014-03-17 update package path end*/
+    /*Modified by tcl_baijian 2014-03-27 update package path begin*/
+    path.AssignASCII(local_update_file_path);
+    /*Modified by tcl_baijian 2014-03-27 update package path end*/
     file->InitWithNativePath(path);
     file->Create(nsIFile::NORMAL_FILE_TYPE, 0755);
 
@@ -1324,9 +1358,11 @@ JrdFotaNative::_fota_pause_timer_hdlr(nsITimer *aTimer, void *aClosure) {
 bool
 JrdFotaNative::_fota_delete_local_update_file(void) {
   LOG("enter\n");
-  /*Modified by tcl_baijian 2014-03-17 update package and session path begin*/
-  const char* pathStr[2] = {local_update_file_path_p, local_session_repository_path_p};
-  /*Modified by tcl_baijian 2014-03-17 update package and session path end*/
+  /*Modified by tcl_baijian 2014-03-27 update package and session path begin*/
+  char* pathStr[2];
+  pathStr[0] = local_update_file_path;
+  pathStr[1] = local_session_repository_path;
+  /*Modified by tcl_baijian 2014-03-27 update package and session path end*/
   bool res = false;
 
   //Delete local session repository and local update file
