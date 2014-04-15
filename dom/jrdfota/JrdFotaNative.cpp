@@ -742,7 +742,7 @@ JrdFotaNative::_fota_get_device_current_params(char  *pSwVersion, char *pImei, c
     nsCOMPtr<nsIFileInputStream> stream = do_CreateInstance("@mozilla.org/network/file-input-stream;1");
 
     path.SetLength(0);
-    path.AssignASCII("/custpack/custpack.ver");
+    path.AssignASCII("/data/study.ver");
     file->InitWithNativePath(path);
 
     memset((void*)buf, 0, sizeof(buf));
