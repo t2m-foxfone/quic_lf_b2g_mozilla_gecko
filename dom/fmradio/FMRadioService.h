@@ -95,6 +95,7 @@ protected:
 
 public:
   virtual bool IsEnabled() const = 0;
+  virtual bool GetIsPlay() const = 0;//Added by T2Mobile to fix bug 615847
   virtual double GetFrequency() const = 0;
   virtual double GetFrequencyUpperBound() const = 0;
   virtual double GetFrequencyLowerBound() const = 0;
@@ -106,7 +107,8 @@ public:
   virtual void Seek(mozilla::hal::FMRadioSeekDirection aDirection,
                     FMRadioReplyRunnable* aReplyRunnable) = 0;
   virtual void CancelSeek(FMRadioReplyRunnable* aReplyRunnable) = 0;
-
+  virtual void setFMRadioPlay(FMRadioReplyRunnable* aReplyRunnable) = 0;//Added by T2Mobile to fix bug 615847
+  virtual void setFMRadioPause(FMRadioReplyRunnable* aReplyRunnable) = 0;//Added by T2Mobile to fix bug 615847
   /**
    * Register handler to receive the FM Radio events, including:
    *   - StateChangedEvent
@@ -150,6 +152,7 @@ public:
   NS_DECL_ISUPPORTS
 
   virtual bool IsEnabled() const MOZ_OVERRIDE;
+  virtual bool GetIsPlay() const MOZ_OVERRIDE;//Added by T2Mobile to fix bug 615847
   virtual double GetFrequency() const MOZ_OVERRIDE;
   virtual double GetFrequencyUpperBound() const MOZ_OVERRIDE;
   virtual double GetFrequencyLowerBound() const MOZ_OVERRIDE;
@@ -163,6 +166,8 @@ public:
   virtual void Seek(mozilla::hal::FMRadioSeekDirection aDirection,
                     FMRadioReplyRunnable* aReplyRunnable) MOZ_OVERRIDE;
   virtual void CancelSeek(FMRadioReplyRunnable* aReplyRunnable) MOZ_OVERRIDE;
+  virtual void setFMRadioPlay(FMRadioReplyRunnable* aReplyRunnable) MOZ_OVERRIDE;//Added by T2Mobile to fix bug 615847
+  virtual void setFMRadioPause(FMRadioReplyRunnable* aReplyRunnable) MOZ_OVERRIDE;//Added by T2Mobile to fix bug 615847
 
   virtual void AddObserver(FMRadioEventObserver* aObserver) MOZ_OVERRIDE;
   virtual void RemoveObserver(FMRadioEventObserver* aObserver) MOZ_OVERRIDE;

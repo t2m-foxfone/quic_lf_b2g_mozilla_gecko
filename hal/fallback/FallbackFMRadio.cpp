@@ -57,5 +57,16 @@ void
 CancelFMRadioSeek()
 {}
 
+//Added by T2Mobile to fix bug 615847
+void
+SetFMRadioMute(bool value)
+{}
+
+bool
+IsFMRadioMute()
+{
+  return true;
+}
+//---Added end
 } // hal_impl
 } // namespace mozilla

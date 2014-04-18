@@ -1059,6 +1059,22 @@ CancelFMRadioSeek() {
   PROXY_IF_SANDBOXED(CancelFMRadioSeek());
 }
 
+//Added by T2Mobile to fix bug 615847
+void
+SetFMRadioMute(bool value)
+{
+  AssertMainThread();
+  PROXY_IF_SANDBOXED(SetFMRadioMute(value));
+}
+
+bool
+IsFMRadioMute()
+{
+  AssertMainThread();
+  RETURN_PROXY_IF_SANDBOXED(IsFMRadioMute(), true);
+}
+//---Added end
+
 FMRadioSettings
 GetFMBandSettings(FMRadioCountry aCountry) {
   FMRadioSettings settings;

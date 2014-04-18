@@ -21,6 +21,9 @@ interface FMRadio : EventTarget {
   /* The lower bound of frequency in MHz. */
   readonly attribute double frequencyLowerBound;
 
+  /* RM Radio is play */
+  readonly attribute boolean isPlay;//Added by T2Mobile to fix bug 615847
+
   /**
    * The difference in frequency between two "adjacent" channels, in MHz. That
    * is, any two radio channels' frequencies differ by at least channelWidth
@@ -94,5 +97,15 @@ interface FMRadio : EventTarget {
    * error will be fired.
    */
   DOMRequest cancelSeek();
+
+  /**
+   * FM Radio Play action.
+   */
+  DOMRequest setFMRadioPlay();//Added by T2Mobile to fix bug 615847
+
+  /**
+   * FM Radio pause action.
+   */
+  DOMRequest setFMRadioPause();//Added by T2Mobile to fix bug 615847
 };
 

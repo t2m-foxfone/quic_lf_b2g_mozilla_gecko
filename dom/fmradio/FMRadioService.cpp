@@ -346,6 +346,15 @@ FMRadioService::IsEnabled() const
   return IsFMRadioOn();
 }
 
+//Added by T2Mobile to fix bug 615847
+bool
+FMRadioService::GetIsPlay() const
+{
+  MOZ_ASSERT(NS_IsMainThread(), "Wrong thread!");
+  return IsFMRadioMute();
+}
+//---Added end
+
 double
 FMRadioService::GetFrequency() const
 {
@@ -648,6 +657,20 @@ FMRadioService::CancelSeek(FMRadioReplyRunnable* aReplyRunnable)
   aReplyRunnable->SetReply(SuccessResponse());
   NS_DispatchToMainThread(aReplyRunnable);
 }
+
+//Added by T2Mobile to fix bug 615847
+void
+FMRadioService::setFMRadioPlay(FMRadioReplyRunnable* aReplyRunnable)
+{
+  SetFMRadioMute(false);
+}
+
+void
+FMRadioService::setFMRadioPause(FMRadioReplyRunnable* aReplyRunnable)
+{
+  SetFMRadioMute(true);
+}
+//---Added end
 
 NS_IMETHODIMP
 FMRadioService::Observe(nsISupports * aSubject,

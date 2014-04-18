@@ -65,6 +65,8 @@ public:
 
   double ChannelWidth() const;
 
+  bool IsPlay() const;//Added by T2Mobile to fix bug 615847
+
   already_AddRefed<DOMRequest> Enable(double aFrequency);
 
   already_AddRefed<DOMRequest> Disable();
@@ -76,6 +78,10 @@ public:
   already_AddRefed<DOMRequest> SeekDown();
 
   already_AddRefed<DOMRequest> CancelSeek();
+
+  already_AddRefed<DOMRequest> SetFMRadioPlay(); //Added by T2Mobile to fix bug 615847
+
+  already_AddRefed<DOMRequest> SetFMRadioPause();//Added by T2Mobile to fix bug 615847
 
   IMPL_EVENT_HANDLER(enabled);
   IMPL_EVENT_HANDLER(disabled);

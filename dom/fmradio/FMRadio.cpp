@@ -231,6 +231,14 @@ FMRadio::Enabled()
   return IFMRadioService::Singleton()->IsEnabled();
 }
 
+//Added by T2Mobile to fix bug 615847
+bool
+FMRadio::IsPlay() const
+{
+  return IFMRadioService::Singleton()->GetIsPlay();
+}
+//---Added end
+
 bool
 FMRadio::AntennaAvailable() const
 {
@@ -348,6 +356,36 @@ FMRadio::CancelSeek()
 
   return r.forget();
 }
+
+//Added by T2Mobile to fix bug 615847
+already_AddRefed<DOMRequest>
+FMRadio::SetFMRadioPlay()
+{
+  nsCOMPtr<nsPIDOMWindow> win = GetOwner();
+  if (!win) {
+    return nullptr;
+  }
+
+  nsRefPtr<FMRadioRequest> r = new FMRadioRequest(win, this);
+  IFMRadioService::Singleton()->setFMRadioPlay(r);
+
+  return r.forget();
+}
+
+already_AddRefed<DOMRequest>
+FMRadio::SetFMRadioPause()
+{
+  nsCOMPtr<nsPIDOMWindow> win = GetOwner();
+  if (!win) {
+    return nullptr;
+  }
+
+  nsRefPtr<FMRadioRequest> r = new FMRadioRequest(win, this);
+  IFMRadioService::Singleton()->setFMRadioPause(r);
+
+  return r.forget();
+}
+//---Added end
 
 NS_IMETHODIMP
 FMRadio::HandleEvent(nsIDOMEvent* aEvent)

@@ -419,6 +419,21 @@ CancelFMRadioSeek()
   NS_RUNTIMEABORT("FM radio cannot be called from sandboxed contexts.");
 }
 
+//Added by T2Mobile to fix bug 615847
+void
+SetFMRadioMute(bool value)
+{
+  NS_RUNTIMEABORT("FM radio cannot be called from sandboxed contexts.");
+}
+
+bool
+IsFMRadioMute()
+{
+  NS_RUNTIMEABORT("FM radio cannot be called from sandboxed contexts.");
+  return true;
+}
+//---Added end
+
 void
 FactoryReset()
 {

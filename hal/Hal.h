@@ -558,6 +558,18 @@ uint32_t GetFMRadioSignalStrength();
  */
 void CancelFMRadioSeek();
 
+//Added by T2Mobile to fix bug 615847
+/**
+ * Set FM radio Mute On/Off
+ */
+void SetFMRadioMute(bool value);
+
+/**
+ * Get FM radio Mute state
+ */
+bool IsFMRadioMute();
+//---Added end
+
 /**
  * Get FM radio band settings by country.
  */

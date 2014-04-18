@@ -39,6 +39,7 @@ static hal::FMRadioSettings sRadioSettings;
 static int sMsmFMVersion;
 static bool sMsmFMMode;
 
+void SetFMRadioMute(bool value);//Added by T2Mobile to fix bug 615847
 static int
 setControl(uint32_t id, int32_t value)
 {
@@ -194,6 +195,7 @@ initMsmFMRadio(hal::FMRadioSettings &aInfo)
   }
 
   fd.forget();
+  SetFMRadioMute(false);//Added by T2Mobile to fix bug 615847
   sRadioEnabled = true;
 }
 
@@ -452,6 +454,34 @@ GetFMRadioSignalStrength()
 void
 CancelFMRadioSeek()
 {}
+
+//Added by T2Mobile to fix bug 615847
+void
+SetFMRadioMute(bool value)
+{
+  if (value == false) {
+    HAL_LOG(("Fm radio mute off"));
+    setControl(V4L2_CID_AUDIO_MUTE, 0x00);
+  }
+  else {
+    HAL_LOG(("Fm radio mute on"));
+    setControl(V4L2_CID_AUDIO_MUTE, 0x03);
+  }
+}
+
+bool
+IsFMRadioMute()
+{
+  struct v4l2_control control;
+  control.id = V4L2_CID_AUDIO_MUTE;
+  ioctl(sRadioFD, VIDIOC_G_CTRL, &control);
+  HAL_LOG(("Fm radio mute value is %d", control.value));
+  if (control.value == 0)
+    return false;
+  else
+    return true;
+}
+//---Added end
 
 } // hal_impl
 } // namespace mozilla

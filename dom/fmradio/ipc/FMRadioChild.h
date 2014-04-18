@@ -34,6 +34,7 @@ public:
 
   /* IFMRadioService */
   virtual bool IsEnabled() const MOZ_OVERRIDE;
+  virtual bool GetIsPlay() const MOZ_OVERRIDE;//Added by T2Mobile to fix bug 615847
   virtual double GetFrequency() const MOZ_OVERRIDE;
   virtual double GetFrequencyUpperBound() const MOZ_OVERRIDE;
   virtual double GetFrequencyLowerBound() const MOZ_OVERRIDE;
@@ -47,6 +48,8 @@ public:
   virtual void Seek(mozilla::hal::FMRadioSeekDirection aDirection,
                     FMRadioReplyRunnable* aReplyRunnable) MOZ_OVERRIDE;
   virtual void CancelSeek(FMRadioReplyRunnable* aReplyRunnable) MOZ_OVERRIDE;
+  virtual void setFMRadioPlay(FMRadioReplyRunnable* aReplyRunnable) MOZ_OVERRIDE;//Added by T2Mobile to fix bug 615847
+  virtual void setFMRadioPause(FMRadioReplyRunnable* aReplyRunnable) MOZ_OVERRIDE;//Added by T2Mobile to fix bug 615847
 
   virtual void AddObserver(FMRadioEventObserver* aObserver) MOZ_OVERRIDE;
   virtual void RemoveObserver(FMRadioEventObserver* aObserver) MOZ_OVERRIDE;
@@ -78,6 +81,7 @@ private:
   inline void NotifyFMRadioEvent(FMRadioEventType aType);
 
   bool mEnabled;
+  bool mPaused;//Added by T2Mobile to fix bug 615847
   double mFrequency;
   double mUpperBound;
   double mLowerBound;

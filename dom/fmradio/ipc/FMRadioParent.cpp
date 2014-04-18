@@ -29,6 +29,7 @@ bool
 FMRadioParent::RecvGetStatusInfo(StatusInfo* aStatusInfo)
 {
   aStatusInfo->enabled() = IFMRadioService::Singleton()->IsEnabled();
+  aStatusInfo->paused() = IFMRadioService::Singleton()->GetIsPlay();//Added by T2Mobile to fix bug 615847
   aStatusInfo->frequency() = IFMRadioService::Singleton()->GetFrequency();
   aStatusInfo->upperBound() =
     IFMRadioService::Singleton()->GetFrequencyUpperBound();
@@ -63,6 +64,14 @@ FMRadioParent::AllocPFMRadioRequestParent(const FMRadioRequestArgs& aArgs)
     case FMRadioRequestArgs::TCancelSeekRequestArgs:
       IFMRadioService::Singleton()->CancelSeek(requestParent);
       break;
+    //Added by T2Mobile to fix bug 615847
+    case FMRadioRequestArgs::TsetFMRadioPlayRequestArgs:
+      IFMRadioService::Singleton()->setFMRadioPlay(requestParent);
+      break;
+    case FMRadioRequestArgs::TsetFMRadioPauseRequestArgs:
+      IFMRadioService::Singleton()->setFMRadioPause(requestParent);
+      break;
+    //---Added end
     default:
       MOZ_CRASH();
   }

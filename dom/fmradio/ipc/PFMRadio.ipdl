@@ -34,6 +34,16 @@ struct CancelSeekRequestArgs
 {
 };
 
+//Added by T2Mobile to fix bug 615847
+struct setFMRadioPlayRequestArgs
+{
+};
+
+struct setFMRadioPauseRequestArgs
+{
+};
+//---Added end
+
 union FMRadioRequestArgs
 {
   EnableRequestArgs;
@@ -41,11 +51,14 @@ union FMRadioRequestArgs
   SetFrequencyRequestArgs;
   SeekRequestArgs;
   CancelSeekRequestArgs;
+  setFMRadioPlayRequestArgs;//Added by T2Mobile to fix bug 615847
+  setFMRadioPauseRequestArgs;//Added by T2Mobile to fix bug 615847
 };
 
 struct StatusInfo
 {
   bool enabled;
+  bool paused;//Added by T2Mobile to fix bug 615847
   double frequency;
   double upperBound;
   double lowerBound;

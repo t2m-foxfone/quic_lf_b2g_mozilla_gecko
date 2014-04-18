@@ -27,6 +27,7 @@ FMRadioChild::FMRadioChild()
   SendGetStatusInfo(&statusInfo);
 
   mEnabled = statusInfo.enabled();
+  mPaused = statusInfo.paused();//Added by T2Mobile to fix bug 615847
   mFrequency = statusInfo.frequency();
   mUpperBound = statusInfo.upperBound();
   mLowerBound= statusInfo.lowerBound();
@@ -43,6 +44,14 @@ FMRadioChild::IsEnabled() const
 {
   return mEnabled;
 }
+
+//Added by T2Mobile to fix bug 615847
+bool
+FMRadioChild::GetIsPlay() const
+{
+  return mPaused;
+}
+//---Added end
 
 double
 FMRadioChild::GetFrequency() const
@@ -100,6 +109,22 @@ FMRadioChild::CancelSeek(FMRadioReplyRunnable* aReplyRunnable)
 {
   SendRequest(aReplyRunnable, CancelSeekRequestArgs());
 }
+
+//Added by T2Mobile to fix bug 615847
+void
+FMRadioChild::setFMRadioPlay(FMRadioReplyRunnable* aReplyRunnable)
+{
+  SendRequest(aReplyRunnable, setFMRadioPlayRequestArgs());
+  mPaused = !mPaused;
+}
+
+void
+FMRadioChild::setFMRadioPause(FMRadioReplyRunnable* aReplyRunnable)
+{
+  SendRequest(aReplyRunnable, setFMRadioPauseRequestArgs());
+  mPaused = !mPaused;
+}
+//---Added end
 
 inline void
 FMRadioChild::NotifyFMRadioEvent(FMRadioEventType aType)
