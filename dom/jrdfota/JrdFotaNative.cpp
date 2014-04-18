@@ -261,11 +261,22 @@ void
 JrdFotaNative::CheckInstallResult_Int() {
   LOG("enter\n");
   int32_t fotaStatus;
+  /*make sure only when system startup,no action is running*/
+  if(eActionType != eNoAction)
+  {
+     LOG("needn't to check install result\n");
+     return;
+  }
   bool updateResultFileExist = _fileHandle(LOCAL_UPDAT_RESULT_FILE, eCheckExist);
 
   //Step1: check for OS update status after startup
   nsCOMPtr<nsIRecoveryService> recoveryService = do_CreateInstance("@mozilla.org/recovery-service;1");
-  recoveryService->GetFotaUpdateStatus(&fotaStatus);
+  /*Only when LOCAL_UPDAT_RESULT_FILE exist,
+  * CheckInstallResult can be run.
+  */
+  fotaStatus = recoveryService->FOTA_UPDATE_UNKNOWN;
+  if (updateResultFileExist == true)
+    recoveryService->GetFotaUpdateStatus(&fotaStatus);
 
   if (true == updateResultFileExist && fotaStatus != recoveryService->FOTA_UPDATE_UNKNOWN) {
     tOTUStatus res, installStatus = eOS_Error;
