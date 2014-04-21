@@ -482,6 +482,8 @@ JrdFotaNative::_fileHandle(const char* pFilePath, eFileHandleType handleType) {
             file->Remove(true); //Set 'recursive' flag with true to delete directories which are not empty.
             res = true;
           }
+          else/*when file non-exist,we just as remove sucessfully*/
+             res = true;
         }
         break;
 
