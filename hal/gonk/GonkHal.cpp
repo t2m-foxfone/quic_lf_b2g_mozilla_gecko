@@ -405,15 +405,22 @@ GetCurrentBatteryCharging(int* aCharging)
   // Otoro device support
 
   char chargingSrcString[16];
+  /* modified by tcl_chenguoqiang pr 638435 */
+  char chargingSrcStringOnline[16] = "";
 
   success = ReadSysFile("/sys/class/power_supply/battery/status",
                         chargingSrcString, sizeof(chargingSrcString));
+
+  ReadSysFile("/sys/class/power_supply/usb/online",
+    chargingSrcStringOnline, sizeof(chargingSrcStringOnline));
+
   if (success) {
     *aCharging = strcmp(chargingSrcString, "Charging") == 0 ||
-                 strcmp(chargingSrcString, "Full") == 0;
+                 strcmp(chargingSrcString, "Full") == 0 ||
+                 strcmp(chargingSrcStringOnline, "1") == 0;
     return true;
   }
-
+  /* end modify */
   return false;
 }
 
