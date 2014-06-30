@@ -81,6 +81,8 @@ PARALLEL_DIRS += [
     'webidl',
     'xbl',
     'xslt',
+    #dingp@tcl.com add jrd for mmitest
+    'jrd',
 ]
 
 if CONFIG['OS_ARCH'] == 'WINNT':

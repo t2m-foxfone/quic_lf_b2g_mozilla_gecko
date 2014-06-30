@@ -16,6 +16,7 @@ Cu.import("resource://gre/modules/AppsUtils.jsm");
 Cu.import('resource://gre/modules/UserAgentOverrides.jsm');
 Cu.import('resource://gre/modules/Keyboard.jsm');
 Cu.import('resource://gre/modules/ErrorPage.jsm');
+Cu.import('resource://gre/modules/jrd_service.jsm'); // dingp@tcl.com add for soul3.5
 #ifdef MOZ_WIDGET_GONK
 Cu.import('resource://gre/modules/NetworkStatsService.jsm');
 #endif
@@ -452,6 +453,14 @@ var shell = {
     if (evt.keyCode == evt.DOM_VK_F1 && type !== this.lastHardwareButtonEventType) {
       this.lastHardwareButtonEventType = type;
       gSystemMessenger.broadcastMessage('headset-button', type);
+      return;
+    }
+
+    // dingp@tcl.com add for soul3.5
+    // JRD_ZMTANG: route the key down/up event to JRD service instead of 
+    // GAIA system (mainly for MINI-Test)
+    if (JrdService && JrdService.isKeyHooked===true && JrdService.processKeyEvt){
+      JrdService.processKeyEvt(type);
       return;
     }
 

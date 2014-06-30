@@ -109,3 +109,7 @@ DOMCI_CLASS(XULLabeledControlElement)
 DOMCI_CLASS(XULButtonElement)
 DOMCI_CLASS(XULCheckboxElement)
 DOMCI_CLASS(XULPopupElement)
+// dingp@tcl.com add jrd for soul3.5 mmitest
+#if 1  // c++ jrd xuzhe
+DOMCI_CLASS(JrdNvAccess)
+#endif

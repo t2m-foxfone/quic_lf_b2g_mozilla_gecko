@@ -1,0 +1,98 @@
+/*JRD_ZMTANG create on 2012-09-04*/
+
+#include "domstubs.idl"
+#include "nsIDOMDOMRequest.idl"
+
+[scriptable, uuid(0c2b8ae8-ad6c-49d7-85d4-1eb626cd0284)]
+interface jrdIDOMExtension: nsISupports
+{
+  /*To get system information. Now we support the parameter of:
+   * "MAC_ADDR" for wifi mac address 
+   * "BATTERY_TEMP" for battery temeratur
+   */
+  nsIDOMDOMRequest getSysInfo(in string parameter);
+  
+  /*To run one process. Now we support the parameter of:
+   * [parameter]: 'BUGREPORT' ,'DIAGLOG', 'DMESG' , 'LOGCAT' or 'TOMBSTONES'
+   * [storeToDevice]: 'PHONE' or 'SDCARD'
+   */
+  nsIDOMDOMRequest run(in string parameter, in string storeToDevice);
+
+  /*To stop one process. Now we support the parameter of:
+   * [parameter]: 'DIAGLOG' or 'LOGCAT'
+   */
+  nsIDOMDOMRequest stop(in string parameter);
+
+/*----jrd_tyin add for mmitest audio_loop start----*/
+/*
+ * To run mmitest audio loop.
+ * [aprameter]: 'mic' or 'headset-mic'
+*/
+  nsIDOMDOMRequest startAudioLoopTest(in string parameter);
+  nsIDOMDOMRequest stopAudioLoopTest();
+/*----jrd_tyin add for mmitest audio_loop end----*/
+
+
+/*----jrd_tyin add for mmitest force in call start.----*/
+/* audio need play from receiver and speaker, 
+  * so need change phoneState as in call by AudioManager.
+*/
+    nsIDOMDOMRequest startForceInCall();
+    nsIDOMDOMRequest stopForceInCall();
+/*----jrd_tyin add for mmitest force in call end.----*/
+
+
+/*----jrd_tyin add for UniversalCommand start----*/
+    nsIDOMDOMRequest startUniversalCommand(in string command, in boolean isUseShell);
+    nsIDOMDOMRequest stopUniversalCommand();
+/*----jrd_tyin add for UniversalCommand end----*/
+
+//jrd_tyin add, minitest->gps_test start
+//minitest->gps_test need enable at the beginning of minitest for speed up.
+    nsIDOMDOMRequest startGpsTest();
+    nsIDOMDOMRequest stopGpsTest();
+//jrd_tyin add, minitest->gps_test end
+
+/*----jrd_tanya add for nvram start----*/
+  nsIDOMDOMRequest readNvitem(in long item);
+  nsIDOMDOMRequest writeNvitem(in long item, in unsigned long len, [array, size_is(len)] in octet value);
+/*----jrd_tanya add for nvram end----*/
+
+  /*To get the last jrdlog file time. Now we support the jrdlog parameter of:
+   * [parameter]: 'bugreport','dmesg' , 'logcat' , 'diaglog' or 'tombstones'
+   * [aLength]:  The length of the parameterAarry.
+   */
+  nsIDOMDOMRequest getFilesLastTime([array, size_is(aLength)] in string parameterAarry,
+                                     in unsigned long aLength);
+  /*check file is exist or not.*/
+  nsIDOMDOMRequest checkIsFileExist(in string filePath);
+
+  /*check service is running or not.
+   * [parameter]: 'diaglog' or 'logcat' need to be check
+   */
+  nsIDOMDOMRequest checkIsCommandRunning(in string parameter);
+
+  /* dingp@tcl.com add for Charger LED test; config is a string with value
+   * "1"(LED ON) "0"(LED OFF) */
+  nsIDOMDOMRequest setChargerLed(in string config);
+
+  /* dingp@tcl.com add for Camera LED test; config is a string with value
+   * of light brightness */
+  nsIDOMDOMRequest setCameraLed(in string config);
+  /*To hook the key event to the current window instead of GAIA system
+   *The client should reset onkeyevent to null to restore the key event
+   *being processed by GAIA system(from GAIA system)
+   */
+  string fileRead(in string file);
+
+  /* dingp@tcl.com add for hide factory mode code */
+  string getSysCode(in string code);
+
+  attribute nsIDOMEventListener onkeyevent;
+
+  /*Add headset start*/
+  attribute nsIDOMEventListener onHeadsetStatusChanged;
+
+  /*JRD_KLWANG add for CR:414530---Read ro value*/
+  string readRoValue(in string ro);
+};
