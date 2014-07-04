@@ -509,6 +509,10 @@ nsWindow::MakeFullScreen(bool aFullScreen)
 float
 nsWindow::GetDPI()
 {
+	char density[PROPERTY_VALUE_MAX];
+	if (property_get("ro.sf.lcd_density", density, nullptr) > 0) {
+		return atoi(density);
+	}
     return GetGonkDisplay()->xdpi;
 }
 
