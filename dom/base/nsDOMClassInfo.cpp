@@ -172,6 +172,12 @@
 #include "TimeManager.h"
 #endif
 
+// dingp@tcl.com add jrd for soul3.5
+#if 1  // c++ jrd xuzhe
+#include "JrdNvAccess.h"
+#endif
+
+
 using namespace mozilla;
 using namespace mozilla::dom;
 
@@ -478,6 +484,10 @@ static nsDOMClassInfoData sClassInfoData[] = {
                                       DOM_DEFAULT_SCRIPTABLE_FLAGS)
   NS_DEFINE_CHROME_XBL_CLASSINFO_DATA(XULPopupElement, nsDOMGenericSH,
                                       DOM_DEFAULT_SCRIPTABLE_FLAGS)
+#if 1  // c++ jrd xuzhe
+  NS_DEFINE_CLASSINFO_DATA(JrdNvAccess, nsDOMGenericSH,
+                           DOM_DEFAULT_SCRIPTABLE_FLAGS)
+#endif
 };
 
 #define NS_DEFINE_CONTRACT_CTOR(_class, _contract_id)                           \
@@ -1157,6 +1167,14 @@ nsDOMClassInfo::Init()
   DOM_CLASSINFO_MAP_BEGIN(LockedFile, nsIDOMLockedFile)
     DOM_CLASSINFO_MAP_ENTRY(nsIDOMLockedFile)
   DOM_CLASSINFO_MAP_END
+
+// dingp@tcl.com add for soul3.5
+#if 1  // c++ jrd xuzhe
+  DOM_CLASSINFO_MAP_BEGIN(JrdNvAccess, nsIJrdNvAccess)
+    DOM_CLASSINFO_MAP_ENTRY(nsIJrdNvAccess)
+    DOM_CLASSINFO_MAP_ENTRY(nsIDOMEventTarget)
+  DOM_CLASSINFO_MAP_END
+#endif
 
   DOM_CLASSINFO_MAP_BEGIN(CSSFontFeatureValuesRule, nsIDOMCSSFontFeatureValuesRule)
     DOM_CLASSINFO_MAP_ENTRY(nsIDOMCSSFontFeatureValuesRule)
