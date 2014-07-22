@@ -1,0 +1,56 @@
+/* -*- Mode: C++; tab-width: 8; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at http://mozilla.org/MPL/2.0/. */
+include protocol PContent;
+
+namespace mozilla {
+namespace dom {
+namespace jrdfota {
+
+struct NewPackageInfoResponse
+{
+  nsString versionName;
+  int64_t size;
+  nsString description;
+};
+
+struct DownloadCompletedRateResponse
+{
+  int32_t progressRate;
+};
+
+struct CommonStatusResponse
+{
+  nsString actionType;
+  bool isSuccess;
+  nsString errorType;
+};
+
+union JrdFotaResponseValue
+{
+  NewPackageInfoResponse;
+  DownloadCompletedRateResponse;
+  CommonStatusResponse;
+};
+
+async protocol PJrdFota {
+    manager PContent;
+
+child:
+    ResponseValue(JrdFotaResponseValue response);
+    ResetActionStatus();
+
+parent:
+    __delete__();
+    GetNewPackage();
+    Download();
+    Pause();
+    Delete();
+    Install();
+    CheckInstallResult();
+};
+
+} // namespace jrdfota
+} // namespace dom
+} // namespace mozilla

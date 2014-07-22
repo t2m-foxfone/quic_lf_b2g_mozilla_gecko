@@ -226,7 +226,10 @@ public:
 
     virtual bool RecvGarbageCollect() MOZ_OVERRIDE;
     virtual bool RecvCycleCollect() MOZ_OVERRIDE;
-
+    /*Bug#:597107 Added by baijian 2014-02-09 Alloc and dealloc fotaChild begin*/
+    virtual PJrdFotaChild* AllocPJrdFotaChild() MOZ_OVERRIDE;
+    virtual bool DeallocPJrdFotaChild(PJrdFotaChild*) MOZ_OVERRIDE;
+    /*Bug#:597107 Added by baijian 2014-02-09 Alloc and dealloc fotaChild end*/
     virtual bool RecvAppInfo(const nsCString& version, const nsCString& buildID,
                              const nsCString& name, const nsCString& UAName) MOZ_OVERRIDE;
 
