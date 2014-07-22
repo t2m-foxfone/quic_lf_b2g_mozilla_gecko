@@ -260,7 +260,9 @@ JrdFotaNative::Install_Int() {
 void
 JrdFotaNative::CheckInstallResult_Int() {
   LOG("enter\n");
-  int32_t fotaStatus;
+  //int32_t fotaStatus;
+  char buf[1024] = {0};
+  bool installResult = false;
   /*make sure only when system startup,no action is running*/
   if(eActionType != eNoAction)
   {
@@ -270,27 +272,45 @@ JrdFotaNative::CheckInstallResult_Int() {
   bool updateResultFileExist = _fileHandle(LOCAL_UPDAT_RESULT_FILE, eCheckExist);
 
   //Step1: check for OS update status after startup
-  nsCOMPtr<nsIRecoveryService> recoveryService = do_CreateInstance("@mozilla.org/recovery-service;1");
+ // nsCOMPtr<nsIRecoveryService> recoveryService = do_CreateInstance("@mozilla.org/recovery-service;1");
   /*Only when LOCAL_UPDAT_RESULT_FILE exist,
   * CheckInstallResult can be run.
   */
-  fotaStatus = recoveryService->FOTA_UPDATE_UNKNOWN;
-  if (updateResultFileExist == true)
-    recoveryService->GetFotaUpdateStatus(&fotaStatus);
-
-  if (true == updateResultFileExist && fotaStatus != recoveryService->FOTA_UPDATE_UNKNOWN) {
+#if 0
+  if (updateResultFileExist == true){
+     recoveryService->GetFotaUpdateStatus(&fotaStatus);
+  }
+  else {
+    fotaStatus = recoveryService->FOTA_UPDATE_UNKNOWN;
+  }
+#endif
+  if(updateResultFileExist == false) return;
+  int read = 0;
+  FILE *resultFile_p = fopen(LOCAL_UPDAT_RESULT_FILE, "r");
+  if(resultFile_p != NULL){
+    do {
+        read = fread(buf,1,1024,resultFile_p);
+    } while (read < 1024 && errno == EINTR);
+    if(ferror(resultFile_p) == 0){
+        installResult = (strstr(buf,"INSTALL SUCCESS") != NULL) ? true:false;
+    } else {
+       LOG("[ERROR] read file :%s error,errno=%d",LOCAL_UPDAT_RESULT_FILE,errno);
+    }
+    fclose(resultFile_p);
+  } else {
+    LOG("[ERROR] open file :%s error,errno=%d",LOCAL_UPDAT_RESULT_FILE,errno);
+  }
+  if ( true == updateResultFileExist || true == installResult ) {
     tOTUStatus res, installStatus = eOS_Error;
     tOTUSessionInfo *pTempSessionInfo = NULL;
 
     eActionType = eCheckInstallResult;
-    if(fotaStatus == recoveryService->FOTA_UPDATE_SUCCESS) {
-        LOG("Update success\n");
-        installStatus = eOS_Ok;
-
-        //Delete the local update file after install success
-        _fota_delete_local_update_file();
-    }
-    else {
+    if ( true == installResult ) {
+       LOG("Update success\n");
+       installStatus = eOS_Ok;
+       //Delete the local update file after install success
+       _fota_delete_local_update_file();
+    } else {
        LOG("[ERROR] Updata fail\n");
     }
     _fileHandle(LOCAL_UPDAT_RESULT_FILE, eRemove);
