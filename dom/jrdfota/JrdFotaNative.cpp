@@ -55,8 +55,8 @@ struct cb_key _client_private_keys_info[MAX_PRIV_KEYS]=
 
 tOTUOption options[] =
 {
-  //{"SessionRepository\0", "/sdcard/downloaded\0"},
-  {"SessionRepository\0","/storage/sdcard0/downloaded\0"},/*default:sdcard path could not decide*/
+  {"SessionRepository\0", "/sdcard/downloaded\0"},/*intern sdcard path :/sdcard*/
+  //{"SessionRepository\0","/storage/sdcard0/downloaded\0"},/*default:sdcard path could not decide*/
   {"LogFile\0", "/data/fota/fotalib.log\0"},
   {"SessionBackupFile\0", "/data/fota/_session_info.sav\0"},
   { NULL, NULL }  /* Make sure to insert this NULL object in order to mark the end of list. */
@@ -118,8 +118,8 @@ static void load_ext_storage_path(void)
     }
     else
     {
-        strcpy(local_session_repository_path,"/storage/sdcard0/downloaded");
-        strcpy(local_update_file_path,"/storage/sdcard0/.downloaded/update.zip");
+        strcpy(local_session_repository_path,"/sdcard/downloaded");
+        strcpy(local_update_file_path,"/sdcard/.downloaded/update.zip");
     }
 }
 /*Added by tcl_baijian 2014-03-27 set the session and update file path end*/
