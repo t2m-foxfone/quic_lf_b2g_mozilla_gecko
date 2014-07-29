@@ -354,3 +354,9 @@ partial interface Navigator {
   boolean sendBeacon(DOMString url,
                      optional (ArrayBufferView or Blob or DOMString or FormData)? data = null);
 };
+#Bug:597107 Added by baijian 2014-02-09 define mozJrdFota as Navigator member begin
+partial interface Navigator {
+  [Throws]
+  readonly attribute MozJrdFotaManager mozJrdFota;
+};
+#Bug:597107 Added by baijian 2014-02-09 define mozJrdFota as Navigator member end

@@ -32,7 +32,9 @@ include InputStreamParams;
 include PTabContext;
 include URIParams;
 include ProtocolTypes;
-
+/*Bug#:597107 Added by baijian 2014-02-09 add jrdfota into Pcontent begin*/
+include protocol PJrdFota;
+/*Bug#:597107 Added by baijian 2014-02-09 add jrdfota into Pcontent end*/
 using GeoPosition from "nsGeoPositionIPCSerialiser.h";
 
 using struct ChromePackage from "mozilla/chrome/RegistryMessageUtils.h";
@@ -254,6 +256,9 @@ intr protocol PContent
     manages PTelephony;
     manages PTestShell;
     manages PJavaScript;
+    /*Bug#:597107 Added by baijian 2014-02-09 add jrdfota into Pcontent begin*/
+    manages PJrdFota;
+    /*Bug#:597107 Added by baijian 2014-02-09 add jrdfota into Pcontent end*/
 
 both:
     // Depending on exactly how the new browser is being created, it might be
@@ -415,7 +420,9 @@ parent:
     PBluetooth();
 
     PFMRadio();
-
+/*Bug#:597107 Added by baijian 2014-02-09 add jrdfota into Pcontent begin*/
+    PJrdFota();
+/*Bug#:597107 Added by baijian 2014-02-09 add jrdfota into Pcontent end*/
     PAsmJSCacheEntry(OpenMode openMode, WriteParams write, Principal principal);
 
     // Services remoting
