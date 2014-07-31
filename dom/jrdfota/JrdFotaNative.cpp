@@ -284,7 +284,11 @@ JrdFotaNative::CheckInstallResult_Int() {
     fotaStatus = recoveryService->FOTA_UPDATE_UNKNOWN;
   }
 #endif
-  if(updateResultFileExist == false) return;
+  if(updateResultFileExist == false) {
+    /*PR753182:clear the ActionStatus*/
+    SendResetActionStatus_Int();
+    return;
+  }
   int read = 0;
   FILE *resultFile_p = fopen(LOCAL_UPDAT_RESULT_FILE, "r");
   if(resultFile_p != NULL){
