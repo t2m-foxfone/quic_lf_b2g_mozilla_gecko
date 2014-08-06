@@ -60,7 +60,7 @@ namespace mozilla {
             /* destructor code */
             LOG("destructor.\n");
 #if defined(MOZ_WIDGET_GONK)
-            if (!handle) {
+            if (handle) {
                 dlclose(handle);
                 handle = NULL;
                 tracability_read_p = NULL;
