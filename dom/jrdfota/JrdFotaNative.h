@@ -130,13 +130,17 @@ private:
 
   //For async handler
   static bool bGetNewPackaged;
-  eJrdFotaAction eActionType;
   tOTUStatus deliverStatus;
   int previousRate;
   bool bDownloadStarted;
   /*Modified by tcl_baijian 2014-03-04 make sure the lib  olny once begin*/
   bool bInitial;
   /*Modified by tcl_baijian 2014-03-04 make sure the lib  olny once end*/
+  /*for download and pause repeat*/
+  bool mSessionResuming;
+  bool mPaused;
+protected:
+  eJrdFotaAction eActionType;
 };
 
 } // namespace jrdfota
