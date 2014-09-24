@@ -84,6 +84,7 @@ PARALLEL_DIRS += [
     'xbl',
     'xslt',
     'jrd',
+    'jrdfota',
 ]
 
 if CONFIG['OS_ARCH'] == 'WINNT':
