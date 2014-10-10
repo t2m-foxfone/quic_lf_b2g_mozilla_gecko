@@ -86,3 +86,5 @@ DOMCI_CLASS(XULLabeledControlElement)
 DOMCI_CLASS(XULButtonElement)
 DOMCI_CLASS(XULCheckboxElement)
 DOMCI_CLASS(XULPopupElement)
+
+DOMCI_CLASS(JrdNvAccess)

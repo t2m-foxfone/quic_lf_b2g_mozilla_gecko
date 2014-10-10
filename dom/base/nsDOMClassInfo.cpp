@@ -156,6 +156,8 @@
 #include "TimeManager.h"
 #endif
 
+#include "JrdNvAccess.h"
+
 using namespace mozilla;
 using namespace mozilla::dom;
 
@@ -429,6 +431,9 @@ static nsDOMClassInfoData sClassInfoData[] = {
                                       DOM_DEFAULT_SCRIPTABLE_FLAGS)
   NS_DEFINE_CHROME_XBL_CLASSINFO_DATA(XULPopupElement, nsDOMGenericSH,
                                       DOM_DEFAULT_SCRIPTABLE_FLAGS)
+
+  NS_DEFINE_CLASSINFO_DATA(JrdNvAccess, nsDOMGenericSH,
+                                 DOM_DEFAULT_SCRIPTABLE_FLAGS)
 };
 
 #define NS_DEFINE_CONTRACT_CTOR(_class, _contract_id)                           \
@@ -1057,6 +1062,11 @@ nsDOMClassInfo::Init()
 
   DOM_CLASSINFO_MAP_BEGIN_NO_CLASS_IF(XULPopupElement, nsIDOMXULPopupElement)
     DOM_CLASSINFO_MAP_ENTRY(nsIDOMXULPopupElement)
+  DOM_CLASSINFO_MAP_END
+
+  DOM_CLASSINFO_MAP_BEGIN(JrdNvAccess, nsIJrdNvAccess)
+    DOM_CLASSINFO_MAP_ENTRY(nsIJrdNvAccess)
+    DOM_CLASSINFO_MAP_ENTRY(nsIDOMEventTarget)
   DOM_CLASSINFO_MAP_END
 
   static_assert(MOZ_ARRAY_LENGTH(sClassInfoData) == eDOMClassInfoIDCount,
