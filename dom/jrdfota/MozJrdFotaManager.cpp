@@ -297,6 +297,7 @@ MozJrdFotaManager::SendResetActionStatus_Int()
 {
   LOG("enter\n");
   gJrdFotaActionStatus.AssignASCII("NoAction");
+  eActionType = eNoAction;
 }
 
 void

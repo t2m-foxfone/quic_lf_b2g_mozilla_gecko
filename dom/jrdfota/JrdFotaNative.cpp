@@ -65,7 +65,22 @@ tOTUOption options[] =
 namespace mozilla {
 namespace dom {
 namespace jrdfota {
-
+/*enter into async function, if want to pause,please set flag:mPaused*/
+#define DO_PAUSE_PRE(SELF) (SELF)->mSessionResuming = true
+/*when the async fun finished ,just return*/
+#define DO_PAUSE_LATER(SELF,KILL) do {\
+  (SELF)->mSessionResuming = false;\
+  if ((SELF)->mPaused == true) {\
+     LOG("alread pause,just return\n");\
+     (SELF)->mPaused = false;\
+     (SELF)->_fota_send_common_status_response("Pause", true, eOS_Unknown);\
+     (SELF)->SendResetActionStatus_Int();\
+     (SELF)->bDownloadStarted = false;\
+     if (KILL == true)\
+	 (SELF)->_fota_shut_down();\
+     return;\
+  }\
+}while(0)
 tOTUSessionInfo * JrdFotaNative::pSessionInfo = NULL;
 bool JrdFotaNative:: bGetNewPackaged = false;
 /*Added by tcl_baijian 2014-03-27 set the session and update file path begin*/
@@ -96,6 +111,9 @@ JrdFotaNative::JrdFotaNative() {
   /*Modified by tcl_baijian 2014-03-04 init begin*/
   bInitial = false;
   /*Modified by tcl_baijian 2014-03-04 init end*/
+  mSessionResuming = false;
+  mPaused = false;
+  mPausing = false;
   /*set session and update file path*/
   load_ext_storage_path();
 
@@ -178,7 +196,24 @@ JrdFotaNative::GetNewPackage_Int() {
 void
 JrdFotaNative::Download_Int() {
   LOG("enter\n");
-
+  if(eActionType == eDownload)
+     return;
+  /*resume download--make this go on*/
+  if (this->mSessionResuming == true && this->mPaused == true) {
+    LOG("Download go on...\n");
+    this->mPaused = false;
+    eActionType = eDownload;
+    return;
+  }
+  /*now just doing Pasue, so can't download*/
+  if(mPausing == true){
+    this->_fota_send_common_status_response("Download", false, eOS_Unknown);
+    this->SendResetActionStatus_Int();
+	return;
+  }
+  /*Download is going on,just return*/
+  if(mSessionResuming == true || bDownloadStarted == true)
+    return;
   eActionType = eDownload;
   bDownloadStarted = false;
 
@@ -193,24 +228,40 @@ JrdFotaNative::Download_Int() {
 void
 JrdFotaNative::Pause_Int() {
   LOG("enter\n");
+  if(eActionType == ePause)
+    return;
+  /*if not download,just return*/
+  if (eActionType != eDownload || mPausing == true){
+    _fota_send_common_status_response("Pause", true, eOS_Unknown);
+    SendResetActionStatus_Int();
+    return;
+  }
+  eActionType = ePause;
+
   if(false == bDownloadStarted) {
+    /*Just do some async function,wait for it finish,just set the flag:mPaused*/
+    if(mSessionResuming == true) {
+      LOG("now resume the session\n");
+      mPaused = true;
+      _fota_send_common_status_response("Pause", true, eOS_Unknown);
+      SendResetActionStatus_Int();
+      return;
+    }
     //Should shut down, maybe fota_init again when stay get_session_info
     _fota_shut_down();
     _fota_send_common_status_response("Pause", true, eOS_Unknown);
     SendResetActionStatus_Int();
-  }
-  else {
+  } else {
     tOTUStatus res;
 
     res = otu_request_download_stop();
     if (eOS_Ok == res) {
       LOG("Pausing download ... ");
       mPauseTimeOut = 0;
-
+      mPausing = true;
       mPauseTimer->InitWithFuncCallback(_fota_pause_timer_hdlr,
          this, TIME_INTERVAL_VALUE, nsITimer::TYPE_REPEATING_SLACK);
-    }
-    else { //eOS_AnotherRequestAlreadyOnGoingError
+    } else { //eOS_AnotherRequestAlreadyOnGoingError
        LOG("[ERROR] Failed to pasuse.\n");
        _fota_send_common_status_response("Pause", false, res);
        SendResetActionStatus_Int();
@@ -670,6 +721,9 @@ JrdFotaNative::_fota_Init(void) {
   if(res == eOS_Ok)
   {
       bInitial = true;
+      mSessionResuming = false;
+      mPaused = false;
+      mPausing = false;
   }
   /*Added by tcl_baijian 2014-03-04 when init finished set bInitial end*/
   LOG("res: %u\n",res);
@@ -708,6 +762,9 @@ JrdFotaNative::_fota_shut_down(void) {
   bDownloadStarted = false;
   otu_shutdown();
   bInitial = false;
+  mSessionResuming = false;
+  mPaused = false;
+  mPausing = false;
   /*Modified by tcl_baijian 2014-03-04 do not shutdown once more end*/
 }
 /*Added by tcl_baijian 2014-03-04 lib reset begin*/
@@ -972,11 +1029,13 @@ JrdFotaNative::_fota_download_timer_hdlr(nsITimer *aTimer, void *aClosure) {
 
   if(self) {
      int dlstatus = 0;
+     int rate = 0;
      tOTUStatus res;
      tUInt32 total_size;
      tUInt32 downloaded_size;
 
      dlstatus = otu_get_request_completion_status();
+     rate = dlstatus/10;
      res = otu_get_request_status();
      otu_downloaded_byte(&total_size,&downloaded_size);
 
@@ -986,14 +1045,14 @@ JrdFotaNative::_fota_download_timer_hdlr(nsITimer *aTimer, void *aClosure) {
         * Report download status to server.
         * And here don't need to set timer, because now we don't shut down library and don't care the report result.
        */
-       LOG("SUAPP: Downloading ... %u/%u bytes (%3.1f%%) @ %.2f bytes/s                                \n",
-          downloaded_size, total_size, (double) dlstatus/10.,otu_download_speed());
-
        LOG("\nDownload succeeded. Terminated.\n");
-
+       /*ensure do once when if(self->previousRate != rate)*/
+       self->previousRate = rate;
        //Dispatch completion rate to gaia
-       self->SendDownloadCompleteRateReponse_Int(dlstatus/10);
+       self->SendDownloadCompleteRateReponse_Int(rate);
 
+       /*now it finish,so set bDownloadStarted =  false*/
+       self->bDownloadStarted = false;
        self->_fota_report_to_otu_server(eOO_Download, eOS_Ok, self->pSessionInfo, 0, 0);
      }
 
@@ -1001,7 +1060,8 @@ JrdFotaNative::_fota_download_timer_hdlr(nsITimer *aTimer, void *aClosure) {
        LOG("[ERROR] An unrecoverable error occured: %u\n",res);
 
        aTimer->Cancel();
-
+       /*now it ocurred error and it stoped,so set bDownloadStarted =  false*/
+       self->bDownloadStarted = false;
        //Report download status to server.
        self->_fota_report_to_otu_server(eOO_Download, res, self->pSessionInfo, 0, 0);
      }
@@ -1010,12 +1070,11 @@ JrdFotaNative::_fota_download_timer_hdlr(nsITimer *aTimer, void *aClosure) {
        downloaded_size, total_size, (double) dlstatus/10.,otu_download_speed());
 
      //Dispatch completion rate to gaia
-     if(self->previousRate != dlstatus/10) {
-       self->SendDownloadCompleteRateReponse_Int(dlstatus/10);
-       self->previousRate = dlstatus/10;
+     if(self->previousRate != rate) {
+       self->SendDownloadCompleteRateReponse_Int(rate);
+       self->previousRate = rate;
      }
-  }
-  else if(aTimer) {
+  } else if(aTimer) {
      aTimer->Cancel();
   }
 }
@@ -1032,6 +1091,8 @@ JrdFotaNative::_fota_download_start(void) {
      previousRate = 0;
      mCommonTimer->InitWithFuncCallback(_fota_download_timer_hdlr,
        this, TIME_INTERVAL_VALUE, nsITimer::TYPE_REPEATING_SLACK);
+     /*download command sucess, reply to gaia lay*/
+     _fota_send_common_status_response("Download", true, eOS_Unknown);
    }
    else {
      //Report download status to server.
@@ -1050,6 +1111,9 @@ JrdFotaNative::_fota_resume_session_timer_hdlr(nsITimer *aTimer, void *aClosure)
     LOG("res: %d\n", res);
     if(res >= eOS_Ok) {
       aTimer->Cancel();
+
+      DO_PAUSE_LATER(self,false);
+
       if(eOS_Ok == res) {
         int dlstatus = 0;
 
@@ -1090,6 +1154,7 @@ JrdFotaNative::_fota_resume_session(void) {
   if(eOS_Ok == otu_get_session_availability(pSessionInfo)) {
     res = otu_request_session_resume(pSessionInfo);
     if (eOS_Ok == res) {
+      DO_PAUSE_PRE(this);
       mCommonTimer->InitWithFuncCallback(_fota_resume_session_timer_hdlr,
         this, TIME_INTERVAL_VALUE, nsITimer::TYPE_REPEATING_SLACK);
     }
@@ -1113,8 +1178,8 @@ JrdFotaNative::_fota_get_session_info_timer_hdlr(nsITimer *aTimer, void *aClosur
     tOTUStatus res;
 
     res = otu_get_request_status();
-    LOG("res: %d\n", res);
     self->commonTimeOut++;
+    LOG("res: %d,times:%d\n", res,self->commonTimeOut);
     if(!(res < eOS_Ok &&  self->commonTimeOut <= TIME_OUT_MAX_VALUE)) {
       aTimer->Cancel();
       if(self->commonTimeOut > TIME_OUT_MAX_VALUE) {
@@ -1124,6 +1189,7 @@ JrdFotaNative::_fota_get_session_info_timer_hdlr(nsITimer *aTimer, void *aClosur
       }
       else {
         if(eOS_Ok == res) {
+	      DO_PAUSE_LATER(self,true);
           res = otu_get_file_list(&self->pSessionInfo);
 
           if(eOS_Ok == res) {
@@ -1139,9 +1205,7 @@ JrdFotaNative::_fota_get_session_info_timer_hdlr(nsITimer *aTimer, void *aClosur
               self->bGetNewPackaged = true;
             }
           }
-        }
-
-        if(eOS_Ok != res) {
+        } else {
            self->_fota_shut_down();
            self->_fota_send_common_status_response("Download", false, res);
            self->SendResetActionStatus_Int();
@@ -1171,6 +1235,9 @@ JrdFotaNative::_fota_get_session_info(void) {
 
       if(eOS_Ok == res) {
         commonTimeOut = 0;
+
+	    DO_PAUSE_PRE(this);
+
         mCommonTimer->InitWithFuncCallback(_fota_get_session_info_timer_hdlr,
           this, TIME_INTERVAL_VALUE, nsITimer::TYPE_REPEATING_SLACK);
       }
@@ -1367,27 +1434,26 @@ JrdFotaNative::_fota_pause_timer_hdlr(nsITimer *aTimer, void *aClosure) {
          LOG("Failed due to time out!\n");
          self->_fota_send_common_status_response("Pause", false, eOS_TimeOut);
          self->SendResetActionStatus_Int();
-      }
-      else {
+      } else {
         if (res != eOS_Paused) {
            LOG("Failed with returned code %u!\n",res);
            self->_fota_send_common_status_response("Pause", false, res);
            self->SendResetActionStatus_Int();
-        }
-        else {
+        } else {
            LOG("Ok!\n");
            //Only stop the previous download timer. The next download action can be runned quickly.
            if (self->mCommonTimer) {
              self->mCommonTimer->Cancel();
            }
-
+           /*now it is paused,so set bDownloadStarted false*/
+           self->bDownloadStarted = false;
            self->_fota_send_common_status_response("Pause", true, eOS_Unknown);
            self->SendResetActionStatus_Int();
         }
       }
+	  self->mPausing = false;
     }
-  }
-  else if(aTimer) {
+  } else if (aTimer) {
     aTimer->Cancel();
   }
 }
