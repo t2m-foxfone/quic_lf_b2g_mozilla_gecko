@@ -135,6 +135,7 @@ OS_LIBS += \
   -lbinder \
   -lgui \
   $(NULL)
+EXTRA_DSO_LDOPTS += -lsuapp_d_native -lstlport_shared
 endif
 
 ifneq (,$(filter rtsp,$(NECKO_PROTOCOLS)))

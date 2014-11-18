@@ -87,7 +87,9 @@
 #include "nsIDOMGlobalPropertyInitializer.h"
 #include "mozilla/dom/DataStoreService.h"
 #include "nsJSUtils.h"
-
+/*Bug#:597107 Added by baijian 2014-02-09 Navigator invoke MozJrdFotaManager begin*/
+#include "mozilla/dom/jrdfota/MozJrdFotaManager.h"
+/*Bug#:597107 Added by baijian 2014-02-09 Navigator invoke MozJrdFotaManager end*/
 #include "nsScriptNameSpaceManager.h"
 
 #include "mozilla/dom/NavigatorBinding.h"
@@ -192,6 +194,9 @@ NS_IMPL_CYCLE_COLLECTION_TRAVERSE_BEGIN(Navigator)
   NS_IMPL_CYCLE_COLLECTION_TRAVERSE(mTimeManager)
   NS_IMPL_CYCLE_COLLECTION_TRAVERSE(mServiceWorkerContainer)
 
+  /*Bug#:597107 Added by baijian 2014-02-09 define var:mJrdFotaManager begin*/
+  NS_IMPL_CYCLE_COLLECTION_TRAVERSE(mJrdFotaManager)
+  /*Bug#:597107 Added by baijian 2014-02-09 define var:mJrdFotaManager end*/
   NS_IMPL_CYCLE_COLLECTION_TRAVERSE(mWindow)
   NS_IMPL_CYCLE_COLLECTION_TRAVERSE(mCachedResolveResults)
   NS_IMPL_CYCLE_COLLECTION_TRAVERSE_SCRIPT_OBJECTS
@@ -300,7 +305,11 @@ Navigator::Invalidate()
   if (mTimeManager) {
     mTimeManager = nullptr;
   }
-
+/*Bug#:597107 Added by baijian 2014-02-09 Invalidate mJrdFotaManager begin*/
+  if (mJrdFotaManager) {
+    mJrdFotaManager = nullptr;
+  }
+/*Bug#:597107 Added by baijian 2014-02-09 Invalidate mJrdFotaManager end*/
   mServiceWorkerContainer = nullptr;
 }
 
@@ -1854,6 +1863,31 @@ Navigator::GetMozTime(ErrorResult& aRv)
   return mTimeManager;
 }
 #endif
+
+/*Bug#:597107 Added by baijian 2014-02-09 Get MozJrdFotaManager begin*/
+//*****************************************************************************
+//  Navigator::MozJrdFotaManager
+//*****************************************************************************
+jrdfota::MozJrdFotaManager*
+Navigator::GetMozJrdFota(ErrorResult& aRv)
+{
+  LOG("GetMozJrdFota ");
+  //JRD_KLWANG add for CR:461160----Protect JrdFota WebAPI
+  if (!CheckPermission("jrdfota")) {
+    LOG("GetMozJrdFota CheckPermission return false");
+    aRv.Throw(NS_ERROR_UNEXPECTED);
+    return nullptr;
+  }
+
+  if (!mJrdFotaManager) {
+    mJrdFotaManager = new jrdfota::MozJrdFotaManager(mWindow);
+  }
+  else{
+     LOG("mJrdFotaManager exist just return");
+  }
+  return mJrdFotaManager;
+}
+/*Bug#:597107 Added by baijian 2014-02-09 Get MozJrdFotaManager end*/
 
 nsDOMCameraManager*
 Navigator::GetMozCameras(ErrorResult& aRv)

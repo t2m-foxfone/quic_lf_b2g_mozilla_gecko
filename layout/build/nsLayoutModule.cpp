@@ -247,6 +247,9 @@ static void Shutdown();
 
 #include "GMPService.h"
 
+#include "JrdNvAccess.h"
+using namespace mozilla::dom::jrd;
+
 using namespace mozilla;
 using namespace mozilla::dom;
 using namespace mozilla::dom::mobilemessage;
@@ -362,6 +365,8 @@ NS_GENERIC_FACTORY_SINGLETON_CONSTRUCTOR(nsIMediaManagerService,
                                          MediaManager::GetInstance)
 NS_GENERIC_FACTORY_SINGLETON_CONSTRUCTOR(nsITelephonyService,
                                          TelephonyFactory::CreateTelephonyService)
+
+NS_GENERIC_FACTORY_CONSTRUCTOR(JrdNvAccess)
 
 //-----------------------------------------------------------------------------
 
@@ -788,6 +793,8 @@ NS_DEFINE_NAMED_CID(NS_MEDIASTREAMCONTROLLERSERVICE_CID);
 #ifdef MOZ_WIDGET_GONK
 NS_DEFINE_NAMED_CID(GONK_GPS_GEOLOCATION_PROVIDER_CID);
 #endif
+NS_DEFINE_NAMED_CID(JRDNVACCESS_CID);
+
 NS_DEFINE_NAMED_CID(NS_MEDIAMANAGERSERVICE_CID);
 #ifdef MOZ_GAMEPAD
 NS_DEFINE_NAMED_CID(NS_GAMEPAD_TEST_CID);
@@ -1081,6 +1088,7 @@ static const mozilla::Module::CIDEntry kLayoutCIDs[] = {
 #ifdef MOZ_WIDGET_GONK
   { &kGONK_GPS_GEOLOCATION_PROVIDER_CID, false, nullptr, nsIGeolocationProviderConstructor },
 #endif
+  { &kJRDNVACCESS_CID, true, NULL, JrdNvAccessConstructor },
   { &kNS_MEDIAMANAGERSERVICE_CID, false, nullptr, nsIMediaManagerServiceConstructor },
 #ifdef MOZ_GAMEPAD
   { &kNS_GAMEPAD_TEST_CID, false, nullptr, GamepadServiceTestConstructor },
@@ -1237,6 +1245,7 @@ static const mozilla::Module::ContractIDEntry kLayoutContracts[] = {
 #ifdef MOZ_WIDGET_GONK
   { GONK_GPS_GEOLOCATION_PROVIDER_CONTRACTID, &kGONK_GPS_GEOLOCATION_PROVIDER_CID },
 #endif
+  { JRDNVACCESS_CONTRACTID, &kJRDNVACCESS_CID },
 #ifdef MOZ_GAMEPAD
   { NS_GAMEPAD_TEST_CONTRACTID, &kNS_GAMEPAD_TEST_CID },
 #endif
