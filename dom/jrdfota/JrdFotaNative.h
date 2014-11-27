@@ -50,6 +50,8 @@ protected:
   /*Added by tcl_baijian 2014-03-17 select the storage devices begin*/
   void SelectSdcard_Int(unsigned long type,bool immediately);
   /*Added by tcl_baijian 2014-03-17 select the storage devices end*/
+  void SetIMEI_Int(const char* imei);
+  void SetRepoterParament_Int(const char* conType,const char* checkType,const char* root);
 
   virtual void SendNewPackageInfoReponse_Int(const char* pVersionName, int size, const char* pDescription) = 0;
   virtual void SendDownloadCompleteRateReponse_Int(int progressRate) = 0;
@@ -139,7 +141,8 @@ private:
   /*for download and pause repeat*/
   bool mSessionResuming;
   bool mPaused;
-protected:
+  bool mPausing;/*pause is going*/
+protected://move here for children access
   eJrdFotaAction eActionType;
 };
 

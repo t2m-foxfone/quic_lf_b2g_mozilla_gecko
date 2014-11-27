@@ -59,6 +59,9 @@ public:
   /*Added by tcl_baijian 2014-03-17 gaia select the storage devices begin*/
   NS_IMETHODIMP SelectSdcard(unsigned long type,bool immediately);
   /*Added by tcl_baijian 2014-03-17 gaia select the storage devices end*/
+  NS_IMETHODIMP SetIMEI(const nsAString& imei);
+  NS_IMETHODIMP SetRepoterParament(const nsAString& conType,const nsAString& checkType,const nsAString& root);
+
 
 protected:
   virtual void SendNewPackageInfoReponse_Int(const char* pVersionName, int size, const char* pDescription);

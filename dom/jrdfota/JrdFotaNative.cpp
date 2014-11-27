@@ -9,8 +9,6 @@
 #include "nsContentUtils.h"
 #include "JrdFotaNative.h"
 #include "JrdINvAccess.h"
-
-
 #include "nsStringGlue.h"
 #include <stdlib.h>
 /*CU and IMEI define*/
@@ -18,8 +16,10 @@
 
 /*Modified by tcl_baijian 2014-03-27 the storage devices path begin*/
 #define MAX_PATH 128
+#define IMEI_LEN 15
 static char local_session_repository_path[MAX_PATH];
 static char local_update_file_path[MAX_PATH];
+static char local_IMEI[IMEI_LEN+1] = {0};
 /*Modified by tcl_baijian 2014-03-27 the storage devices path end*/
 #define LOCAL_UPDAT_RESULT_FILE "/data/fota/result.txt"
 #define DEVICE_PARAM_STR_MAX_LENGTH 20
@@ -63,6 +63,14 @@ tOTUOption options[] =
   {"SessionBackupFile\0", "/data/fota/_session_info.sav\0"},
   { NULL, NULL }  /* Make sure to insert this NULL object in order to mark the end of list. */
 };
+/*pay attention to the order*/
+tOTUReport_info report_info[] =
+{
+	{OTU_CONNECT_TYPE, NULL },/*info_flag, info_value*/
+	{OTU_CHECK_TYPE, NULL},
+	{OTU_ROOT_FLAG, OTU_ROOT_FLAG_VALUE_NO},/*OTU_ROOT_FLAG_VALUE_YES*/
+	{NULL,NULL},
+};
 
 namespace mozilla {
 namespace dom {
@@ -77,6 +85,7 @@ namespace jrdfota {
      (SELF)->mPaused = false;\
      (SELF)->_fota_send_common_status_response("Pause", true, eOS_Unknown);\
      (SELF)->SendResetActionStatus_Int();\
+     (SELF)->bDownloadStarted = false;\
      if (KILL == true)\
 	 (SELF)->_fota_shut_down();\
      return;\
@@ -114,6 +123,7 @@ JrdFotaNative::JrdFotaNative() {
   /*Modified by tcl_baijian 2014-03-04 init end*/
   mSessionResuming = false;
   mPaused = false;
+  mPausing = false;
   /*set session and update file path*/
   load_ext_storage_path();
 
@@ -121,13 +131,14 @@ JrdFotaNative::JrdFotaNative() {
 /*Added by tcl_baijian 2014-03-27 set the session and update file path begin*/
 static void load_ext_storage_path(void)
 {
-    /*already set*/
+   /*already set*/
     if(strlen(local_session_repository_path) != 0)
-       return;
+	 return;
 
     char* extStorage = getenv("EXTERNAL_STORAGE");
     if(extStorage != NULL)
     {
+        LOG("external storage:%s\n",extStorage);
         strcpy(local_session_repository_path,extStorage);
         strcpy(local_update_file_path,extStorage);
 
@@ -205,6 +216,15 @@ JrdFotaNative::Download_Int() {
     eActionType = eDownload;
     return;
   }
+  /*now just doing Pasue, so can't download*/
+  if(mPausing == true){
+    this->_fota_send_common_status_response("Download", false, eOS_Unknown);
+    this->SendResetActionStatus_Int();
+	return;
+  }
+  /*Download is going on,just return*/
+  if(mSessionResuming == true || bDownloadStarted == true)
+    return;
   eActionType = eDownload;
   bDownloadStarted = false;
 
@@ -222,7 +242,7 @@ JrdFotaNative::Pause_Int() {
   if(eActionType == ePause)
     return;
   /*if not download,just return*/
-  if (eActionType != eDownload){
+  if (eActionType != eDownload || mPausing == true){
     _fota_send_common_status_response("Pause", true, eOS_Unknown);
     SendResetActionStatus_Int();
     return;
@@ -231,11 +251,11 @@ JrdFotaNative::Pause_Int() {
   if(false == bDownloadStarted) {
     /*Just do some async function,wait for it finish,just set the flag:mPaused*/
     if(mSessionResuming == true) {
-	LOG("now resume the session\n");
-	mPaused = true;
-	_fota_send_common_status_response("Pause", true, eOS_Unknown);
+      LOG("now resume the session\n");
+      mPaused = true;
+      _fota_send_common_status_response("Pause", true, eOS_Unknown);
       SendResetActionStatus_Int();
-	return;
+      return;
     }
     //Should shut down, maybe fota_init again when stay get_session_info
     _fota_shut_down();
@@ -248,7 +268,7 @@ JrdFotaNative::Pause_Int() {
     if (eOS_Ok == res) {
       LOG("Pausing download ... ");
       mPauseTimeOut = 0;
-
+      mPausing = true;
       mPauseTimer->InitWithFuncCallback(_fota_pause_timer_hdlr,
          this, TIME_INTERVAL_VALUE, nsITimer::TYPE_REPEATING_SLACK);
     } else { //eOS_AnotherRequestAlreadyOnGoingError
@@ -326,9 +346,9 @@ JrdFotaNative::CheckInstallResult_Int() {
   }
 #endif
   if(updateResultFileExist == false) {
-      /*PR753182:clear the ActionStatus*/
-      SendResetActionStatus_Int();
-      return;
+     /*PR753182:clear the ActionStatus*/
+     SendResetActionStatus_Int();
+     return;
   }
   int read = 0;
   FILE *resultFile_p = fopen(LOCAL_UPDAT_RESULT_FILE, "r");
@@ -337,7 +357,7 @@ JrdFotaNative::CheckInstallResult_Int() {
         read = fread(buf,1,1024,resultFile_p);
     } while (read < 1024 && errno == EINTR);
     if(ferror(resultFile_p) == 0){
-        installResult = (strstr(buf,"INSTALL SUCCESS") != NULL) ? true:false;
+        installResult = (strstr(buf,"SUCCESS") != NULL) ? true:false;
     } else {
        LOG("[ERROR] read file :%s error,errno=%d",LOCAL_UPDAT_RESULT_FILE,errno);
     }
@@ -423,6 +443,39 @@ JrdFotaNative::SelectSdcard_Int(unsigned long type,bool immediately)
    }
 #endif
 }
+void
+JrdFotaNative::SetIMEI_Int(const char* imei){
+
+  if (imei != NULL){
+	if(strlen(imei) != IMEI_LEN){
+	  LOG("IMEI is error\n");
+	  return;
+	}
+	strcpy(local_IMEI,imei);
+  }
+}
+
+void JrdFotaNative::SetRepoterParament_Int(const char* conType,const char* checkType,const char* root){
+
+  if (conType != NULL){
+	if (strcmp(conType,"wifi") == 0){
+	  report_info[0].info_value = OTU_CONNECT_TYPE_VALUE_WIFI;
+	} else if (strcmp(conType,"data") == 0){
+	  report_info[0].info_value = OTU_CONNECT_TYPE_VALUE_3G;
+	}
+  }
+
+  if (checkType != NULL){
+	if (strcmp(checkType,"auto") == 0){
+	  report_info[1].info_value = OTU_CHECK_TYPE_VALUE_AUTO;
+	} else if (strcmp(checkType,"manual") == 0) {
+	  report_info[1].info_value = OTU_CHECK_TYPE_VALUE_MANUAL;
+	}
+  }
+  /*root do nothing*/
+}
+
+
 /*Modified by tcl_baijian 2014-03-17 selected the storage path end*/
 /** **********************************************************
   *                  For Child Send function                  *
@@ -713,6 +766,7 @@ JrdFotaNative::_fota_Init(void) {
       bInitial = true;
       mSessionResuming = false;
       mPaused = false;
+      mPausing = false;
   }
   /*Added by tcl_baijian 2014-03-04 when init finished set bInitial end*/
   LOG("res: %u\n",res);
@@ -753,6 +807,7 @@ JrdFotaNative::_fota_shut_down(void) {
   bInitial = false;
   mSessionResuming = false;
   mPaused = false;
+  mPausing = false;
   /*Modified by tcl_baijian 2014-03-04 do not shutdown once more end*/
 }
 /*Added by tcl_baijian 2014-03-04 lib reset begin*/
@@ -793,6 +848,7 @@ JrdFotaNative::_fota_get_device_current_params(char  *pSwVersion, char *pImei, c
 
   //Get IMEI
   if(NULL != pImei) {
+  #if 0
   	if(nvManager == NULL)
       nvManager = do_CreateInstance("@jrdcom.com/JrdNvAccess;1");
     uint32_t count = 0;
@@ -813,6 +869,8 @@ JrdFotaNative::_fota_get_device_current_params(char  *pSwVersion, char *pImei, c
         }*/
         memcpy(pImei, imei_ascii, DEVICE_PARAM_STR_MAX_LENGTH+1);
     }
+  #endif
+	strcpy(pImei,local_IMEI);
     LOG("pImei: %s\n", pImei);
   }
   /*Modified by tcl baijian version rule changed 2014-02-21 begin*/
@@ -906,9 +964,15 @@ JrdFotaNative::_fota_create_device_info(void) {
     char sw_model[]="FIRMWARE";
     tOTUUpgradeMode update_mode=eOUM_Incremental;
     tOTUClientType client_type = eCT_TCT_Android_3G_Mobile_Build_In_Fota;
+	report_info[2].info_value = OTU_ROOT_FLAG_VALUE_YES;
+	int i = 0;
+	while(report_info[i].info_flag != NULL){
+	  LOG("report info_flag:%s info_value:%s\n", report_info[i].info_flag,report_info[i].info_value);
+	  i++;
+	}
     /*Modified by tcl_baijian 2014-03-04 new lib interface changed begin*/
     if(NULL == pDeviceInfo) {
-      pDeviceInfo = otu_create_device_info(sw_imei,sw_model,sw_com_ref,current_version, update_mode, client_type,NULL);
+      pDeviceInfo = otu_create_device_info(sw_imei,sw_model,sw_com_ref,current_version, update_mode, client_type, report_info);
       if(NULL == pDeviceInfo) {
         res = eOS_Error;
       }
@@ -1018,11 +1082,13 @@ JrdFotaNative::_fota_download_timer_hdlr(nsITimer *aTimer, void *aClosure) {
 
   if(self) {
      int dlstatus = 0;
+     int rate = 0;
      tOTUStatus res;
      tUInt32 total_size;
      tUInt32 downloaded_size;
 
      dlstatus = otu_get_request_completion_status();
+     rate = dlstatus/10;
      res = otu_get_request_status();
      otu_downloaded_byte(&total_size,&downloaded_size);
 
@@ -1032,14 +1098,14 @@ JrdFotaNative::_fota_download_timer_hdlr(nsITimer *aTimer, void *aClosure) {
         * Report download status to server.
         * And here don't need to set timer, because now we don't shut down library and don't care the report result.
        */
-       LOG("SUAPP: Downloading ... %u/%u bytes (%3.1f%%) @ %.2f bytes/s                                \n",
-          downloaded_size, total_size, (double) dlstatus/10.,otu_download_speed());
-
        LOG("\nDownload succeeded. Terminated.\n");
-
+       /*ensure do once when if(self->previousRate != rate)*/
+       self->previousRate = rate;
        //Dispatch completion rate to gaia
-       self->SendDownloadCompleteRateReponse_Int(dlstatus/10);
+       self->SendDownloadCompleteRateReponse_Int(rate);
 
+       /*now it finish,so set bDownloadStarted =  false*/
+       self->bDownloadStarted = false;
        self->_fota_report_to_otu_server(eOO_Download, eOS_Ok, self->pSessionInfo, 0, 0);
      }
 
@@ -1047,7 +1113,8 @@ JrdFotaNative::_fota_download_timer_hdlr(nsITimer *aTimer, void *aClosure) {
        LOG("[ERROR] An unrecoverable error occured: %u\n",res);
 
        aTimer->Cancel();
-
+       /*now it ocurred error and it stoped,so set bDownloadStarted =  false*/
+       self->bDownloadStarted = false;
        //Report download status to server.
        self->_fota_report_to_otu_server(eOO_Download, res, self->pSessionInfo, 0, 0);
      }
@@ -1056,12 +1123,11 @@ JrdFotaNative::_fota_download_timer_hdlr(nsITimer *aTimer, void *aClosure) {
        downloaded_size, total_size, (double) dlstatus/10.,otu_download_speed());
 
      //Dispatch completion rate to gaia
-     if(self->previousRate != dlstatus/10) {
-       self->SendDownloadCompleteRateReponse_Int(dlstatus/10);
-       self->previousRate = dlstatus/10;
+     if(self->previousRate != rate) {
+       self->SendDownloadCompleteRateReponse_Int(rate);
+       self->previousRate = rate;
      }
-  }
-  else if(aTimer) {
+  } else if(aTimer) {
      aTimer->Cancel();
   }
 }
@@ -1078,7 +1144,10 @@ JrdFotaNative::_fota_download_start(void) {
      previousRate = 0;
      mCommonTimer->InitWithFuncCallback(_fota_download_timer_hdlr,
        this, TIME_INTERVAL_VALUE, nsITimer::TYPE_REPEATING_SLACK);
+	 /*send to gaia the download sucessful*/
      _fota_send_common_status_response("Download", true, eOS_Unknown);
+	 /*If update.zip exist,just delete it*/
+     _fileHandle(local_update_file_path,eRemove);
    }
    else {
      //Report download status to server.
@@ -1175,7 +1244,7 @@ JrdFotaNative::_fota_get_session_info_timer_hdlr(nsITimer *aTimer, void *aClosur
       }
       else {
         if(eOS_Ok == res) {
-	   DO_PAUSE_LATER(self,true);
+	      DO_PAUSE_LATER(self,true);
           res = otu_get_file_list(&self->pSessionInfo);
 
           if(eOS_Ok == res) {
@@ -1222,7 +1291,7 @@ JrdFotaNative::_fota_get_session_info(void) {
       if(eOS_Ok == res) {
         commonTimeOut = 0;
 
-	 DO_PAUSE_PRE(this);
+	    DO_PAUSE_PRE(this);
 
         mCommonTimer->InitWithFuncCallback(_fota_get_session_info_timer_hdlr,
           this, TIME_INTERVAL_VALUE, nsITimer::TYPE_REPEATING_SLACK);
@@ -1431,11 +1500,13 @@ JrdFotaNative::_fota_pause_timer_hdlr(nsITimer *aTimer, void *aClosure) {
            if (self->mCommonTimer) {
              self->mCommonTimer->Cancel();
            }
-
+           /*now it is paused,so set bDownloadStarted false*/
+           self->bDownloadStarted = false;
            self->_fota_send_common_status_response("Pause", true, eOS_Unknown);
            self->SendResetActionStatus_Int();
         }
       }
+	  self->mPausing = false;
     }
   } else if (aTimer) {
     aTimer->Cancel();

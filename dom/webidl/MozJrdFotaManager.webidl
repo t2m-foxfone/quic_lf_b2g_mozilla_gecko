@@ -91,5 +91,15 @@ interface MozJrdFotaManager
  */
   void selectSdcard(unsigned long type,boolean immediately);
 
+  /**
+   * SetIMEI Code
+   */
+  void setIMEI(DOMString imei);
+
+  /**
+   *Set Connect type and check Type
+  */
+  void setRepoterParament(DOMString conType,DOMString checkType,DOMString root);
+
   readonly attribute DOMString JrdFotaActionStatus;
 };

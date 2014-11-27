@@ -215,12 +215,46 @@ MozJrdFotaManager::SelectSdcard(unsigned long type,bool immediately)
   }
   else {
      LOG("child process\n");
-
   }
 
   return NS_OK;
 }
 /*Added by tcl_baijian 2014-03-17 gaia select the storage devices only in main process end*/
+NS_IMETHODIMP
+MozJrdFotaManager::SetIMEI(const nsAString& imei)
+{
+   LOG("enter setIMEI\n");
+   if(GeckoProcessType_Default == XRE_GetProcessType()) {
+     LOG("main process\n");
+     #ifdef MOZ_WIDGET_GONK
+      SetIMEI_Int(NS_ConvertUTF16toUTF8(imei).get());
+     #endif
+  }
+  else {
+     LOG("child process\n");
+  }
+
+  return NS_OK;
+}
+
+NS_IMETHODIMP
+MozJrdFotaManager::SetRepoterParament(const nsAString& conType,const nsAString& checkType,const nsAString& root)
+{
+   LOG("enter SetRepoterParament\n");
+   if(GeckoProcessType_Default == XRE_GetProcessType()) {
+     LOG("main process\n");
+     #ifdef MOZ_WIDGET_GONK
+      SetRepoterParament_Int(NS_ConvertUTF16toUTF8(conType).get(),
+                             NS_ConvertUTF16toUTF8(checkType).get(),
+                             NS_ConvertUTF16toUTF8(root).get());
+     #endif
+  }
+  else {
+     LOG("child process\n");
+  }
+
+  return NS_OK;
+}
 void
 MozJrdFotaManager::SendNewPackageInfoReponse_Int(const char* pVersionName, int size, const char* pDescription)
 {
