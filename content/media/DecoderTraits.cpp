@@ -232,7 +232,7 @@ IsOmxSupportedType(const nsACString& aType)
   return CodecListContains(gOmxTypes, aType);
 }
 
-static char const *const gH264Codecs[9] = {
+static char const *const gH264Codecs[10] = {
   "avc1.42E01E",  // H.264 Constrained Baseline Profile Level 3.0
   "avc1.42001E",  // H.264 Baseline Profile Level 3.0
   "avc1.58A01E",  // H.264 Extended Profile Level 3.0
@@ -241,6 +241,7 @@ static char const *const gH264Codecs[9] = {
   "avc1.64001F",  // H.264 High Profile Level 3.1
   "mp4v.20.3",    // 3GPP
   "mp4a.40.2",    // AAC-LC
+  "mp4v.20.9",    // mpeg4 simple profile level 0  //xujuan@tcl.com add for bug 864259
   nullptr
 };
 
@@ -250,10 +251,12 @@ static char const *const gMpegAudioCodecs[2] = {
 };
 
 #ifdef MOZ_OMX_WEBM_DECODER
-static char const *const gOMXWebMCodecs[4] = {
+static char const *const gOMXWebMCodecs[6] = {
   "vorbis",
   "vp8",
   "vp8.0",
+  "vp9",//xujuan@tcl.com add for bug 864259
+  "vp9.0",//xujuan@tcl.com add for bug 864259
   nullptr
 };
 #endif //MOZ_OMX_WEBM_DECODER
